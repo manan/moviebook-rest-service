@@ -13,5 +13,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank = True, null = True)
     birth_date = models.DateField(blank = True, null = True)
-    # relationships = models.ManyToManyField(Follow, symmetrical=False, related_name='related_to',
-                                           # null = True, blank = True)
+
+class Post(models.Model):
+    owner = models.ForeignKey(User, related_name = 'posts')
+    movie_title = models.CharField(max_length = 200)
+    movie_id = models.CharField(max_length = 20)
