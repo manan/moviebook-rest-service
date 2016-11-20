@@ -6,7 +6,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = UserProfile
-        fields = ('user', 'bio', 'birth_date', 'follows')
+        fields = ('user', 'bio', 'birth_date', 'following', 'followers', 'post')
 
 class PostSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='user.username')

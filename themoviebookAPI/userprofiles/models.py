@@ -6,12 +6,18 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class UserProfile(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, unique=True, related_name = 'user')
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name = 'profile')
     bio = models.TextField(blank = True, null = True)
     birth_date = models.DateField(blank = True, null = True)
-    follows = models.ManyToManyField("self", related_name = 'following', symmetrical=False)
+    following = models.ManyToManyField('self', related_name = 'followers', symmetrical=False)
 
+    def __unicode__(self):
+        return self.user.username
+    
 class Post(models.Model):
-    owner = models.ForeignKey('auth.User', related_name = 'posts')
+    owner = models.ForeignKey(UserProfile, related_name = 'post')
     movie_title = models.CharField(max_length = 200)
     movie_id = models.CharField(max_length = 20)
+
+    def __unicode__(self):
+        return self.movie_title
