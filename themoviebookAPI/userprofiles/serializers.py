@@ -12,7 +12,7 @@ class PostSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = Post
-        fields = ('owner', 'movie_title', 'movie_id')
+        fields = ('owner', 'movie_title', 'movie_id', 'caption', 'upload_date')
         
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
