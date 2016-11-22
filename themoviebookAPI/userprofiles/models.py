@@ -19,7 +19,7 @@ class Post(models.Model):
     movie_title = models.CharField(max_length = 200)
     movie_id = models.CharField(max_length = 20)
     caption = models.CharField(max_length = 200)
-    upload_date = models.DateField(auto_now_add=True)
+    upload_date = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return self.movie_title
