@@ -2,18 +2,20 @@ from rest_framework import serializers
 from userprofiles.models import UserProfile, Post
 from django.contrib.auth.models import User
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
-    class Meta:
-        model = UserProfile
-        fields = ('user', 'bio', 'birth_date', 'following', 'followers', 'post')
-
 class PostSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = Post
-        fields = ('owner', 'movie_title', 'movie_id', 'caption', 'upload_date')
-        
+        fields = ('owner', 'movie_title', 'movie_id', 'caption', 'upload_date', 'id')
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    posts = PostSerializer(source = 'post', many = True)
+    
+    class Meta:
+        model = UserProfile
+        fields = ('user', 'bio', 'birth_date', 'following', 'followers', 'posts', 'id')
+
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
