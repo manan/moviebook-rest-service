@@ -161,18 +161,63 @@ def buildUsers():
     post.caption = "I found freedom. Losing all hope was freedom."
     post.save()
 
-    # Followings
-    User.objects.get(username='poojag').profile.following.add(User.objects.get(username='mehtamanan').profile)
-    User.objects.get(username='thejoker').profile.following.add(User.objects.get(username='mehtamanan').profile)
-    User.objects.get(username='tanyasingh24').profile.following.add(User.objects.get(username='mehtamanan').profile)
-    User.objects.get(username='bangbang').profile.following.add(User.objects.get(username='mehtamanan').profile)
-    User.objects.get(username='JagritiSonaSharma').profile.following.add(User.objects.get(username='mehtamanan').profile)
-    User.objects.get(username='mehtamanan').profile.following.add(User.objects.get(username='thejoker').profile)
-    User.objects.get(username='mehtamanan').profile.following.add(User.objects.get(username='JagritiSonaSharma').profile)
-    User.objects.get(username='mehtamanan').profile.following.add(User.objects.get(username='poojag').profile)
-    User.objects.get(username='thejoker').profile.following.add(User.objects.get(username='tanyasingh24').profile)
-    User.objects.get(username='tanyasingh24').profile.following.add(User.objects.get(username='thejoker').profile)
-    User.objects.get(username='JagritiSonaSharma').profile.following.add(User.objects.get(username='bangbang').profile)
-    User.objects.get(username='bangbang').profile.following.add(User.objects.get(username='tanyasingh24').profile)
-    User.objects.get(username='JagritiSonaSharma').profile.following.add(User.objects.get(username='tanyasingh24').profile)
+    # Follow Relationsips
+    # mehtamanan - followers: everyone || following: poojag, jss, thejoker
+    # tanyasingh24 - followers: thejoker, bangbang, jss || following: bangbang, thejoker
+    # poojag - followers: mehtamanan || following: mehtamanan
+    # thejoker - followers: mehtamanan, tanyasingh24 || following: mehtamanan, tanyasingh24
+    # jss - followers: mehtamanan || following: mehtamanan, bangbang, tanyasingh24
+    # bangbang - followers: bangbang || following: mehtamanan
+    
+    #tanyasingh24 following mehtamanan
+    User.objects.get(username='mehtamanan').profile.followers.add(User.objects.get(username='tanyasingh24').profile)
+    User.objects.get(username='tanyasingh24').profile.followings.add(User.objects.get(username='mehtamanan').profile)
+
+    #bangbang following mehtamanan
+    User.objects.get(username='mehtamanan').profile.followers.add(User.objects.get(username='bangbang').profile)
+    User.objects.get(username='bangbang').profile.followings.add(User.objects.get(username='mehtamanan').profile)
+
+    #jss following mehtamanan
+    User.objects.get(username='mehtamanan').profile.followers.add(User.objects.get(username='JagritiSonaSharma').profile)
+    User.objects.get(username='JagritiSonaSharma').profile.followings.add(User.objects.get(username='mehtamanan').profile)
+
+    #thejoker following mehtamanan
+    User.objects.get(username='mehtamanan').profile.followers.add(User.objects.get(username='thejoker').profile)
+    User.objects.get(username='thejoker').profile.followings.add(User.objects.get(username='mehtamanan').profile)
+
+    #poojag following mehtamanan
+    User.objects.get(username='mehtamanan').profile.followers.add(User.objects.get(username='poojag').profile)
+    User.objects.get(username='poojag').profile.followings.add(User.objects.get(username='mehtamanan').profile)
+
+    #mehtamanan following jss
+    User.objects.get(username='JagritiSonaSharma').profile.followers.add(User.objects.get(username='mehtamanan').profile)
+    User.objects.get(username='mehtamanan').profile.followings.add(User.objects.get(username='JagritiSonaSharma').profile)
+
+    #mehtamanan following poojag
+    User.objects.get(username='poojag').profile.followers.add(User.objects.get(username='mehtamanan').profile)
+    User.objects.get(username='mehtamanan').profile.followings.add(User.objects.get(username='poojag').profile)
+
+    #mehtamanan following thejoker
+    User.objects.get(username='thejoker').profile.followers.add(User.objects.get(username='mehtamanan').profile)
+    User.objects.get(username='mehtamanan').profile.followings.add(User.objects.get(username='thejoker').profile)
+
+    #thejoker following tanyasingh24
+    User.objects.get(username='tanyasingh24').profile.followers.add(User.objects.get(username='thejoker').profile)
+    User.objects.get(username='thejoker').profile.followings.add(User.objects.get(username='tanyasingh24').profile)
+
+    #tanyasingh24 following thejoker
+    User.objects.get(username='thejoker').profile.followers.add(User.objects.get(username='tanyasingh24').profile)
+    User.objects.get(username='tanyasingh24').profile.followings.add(User.objects.get(username='thejoker').profile)
+
+    #jss following bangbang
+    User.objects.get(username='bangbang').profile.followers.add(User.objects.get(username='JagritiSonaSharma').profile)
+    User.objects.get(username='JagritiSonaSharma').profile.followings.add(User.objects.get(username='bangbang').profile)
+
+    #bangbang following tanyasingh24
+    User.objects.get(username='tanyasingh24').profile.followers.add(User.objects.get(username='bangbang').profile)
+    User.objects.get(username='bangbang').profile.followings.add(User.objects.get(username='tanyasingh24').profile)
+
+    #jss following tanyasingh24
+    User.objects.get(username='tanyasingh24').profile.followers.add(User.objects.get(username='JagritiSonaSharma').profile)
+    User.objects.get(username='JagritiSonaSharma').profile.followings.add(User.objects.get(username='tanyasingh24').profile)
 

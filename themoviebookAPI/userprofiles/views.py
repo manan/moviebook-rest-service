@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 # Create your views here.
-
+    
 class PostsOfUser(generics.ListCreateAPIView):
     model = Post
     serializer_class = PostSerializer
@@ -116,6 +116,10 @@ class UserList(generics.ListCreateAPIView):
         permissions.AllowAny
     ]
 
+    def perform_create(self, serializer):
+        print 'UserList.perform_create called'
+        serializer.save()
+
 class PostList(generics.ListCreateAPIView):
     model = Post
     queryset = Post.objects.all()
@@ -124,6 +128,10 @@ class PostList(generics.ListCreateAPIView):
         permissions.AllowAny
     ]
 
+    def perform_create(self, serializer):
+        print 'PostList.perform_create called'
+        serializer.save()
+    
 class ProfileList(generics.ListCreateAPIView):
     model = UserProfile
     queryset = UserProfile.objects.all()
@@ -131,3 +139,7 @@ class ProfileList(generics.ListCreateAPIView):
     permission_classes = [
         permissions.AllowAny
     ]
+
+    def perform_create(self, serializer):
+        print 'ProfileList.perform_create called'
+        serializer.save()

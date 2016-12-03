@@ -3,18 +3,15 @@ from userprofiles.models import UserProfile, Post
 from django.contrib.auth.models import User
 
 class PostSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = Post
-        fields = ('user', 'movie_title', 'movie_id', 'caption', 'upload_date', 'id')
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
-    posts = PostSerializer(source = 'post', many = True)
+        fields = ('owner', 'movie_title', 'movie_id', 'caption', 'upload_date', 'id')
     
+class UserProfileSerializer(serializers.ModelSerializer):
+    posts = PostSerializer(source = 'post', many = True)
     class Meta:
         model = UserProfile
-        fields = ('user', 'bio', 'birth_date', 'following', 'followers', 'posts', 'id')
+        fields = ('user', 'bio', 'birth_date', 'followings', 'followers', 'posts', 'id')
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,5 +27,5 @@ class RegistrationSerializer(serializers.ModelSerializer):
                                    last_name = validated_data['last_name'])
         user.set_password(validated_data['password'])
         user.save()
-
+        
         return user
