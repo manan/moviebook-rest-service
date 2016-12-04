@@ -2,17 +2,92 @@ from django.shortcuts import render
 from rest_framework import generics, permissions
 
 from django.http import HttpResponseRedirect, HttpResponse
+from rest_framework.response import Response
+from rest_framework import status
 
 from .models import UserProfile, Post
 from .serializers import UserProfileReadSerializer, UserProfileWriteSerializer
 from .serializers import RegistrationSerializer, PostSerializer
 from django.contrib.auth.models import User
 
+from django.views.decorators.csrf import csrf_exempt
+
 from django.db.models import Q
 
+from datetime import datetime
+from datetime import timedelta
+
 # Create your views here.
+
+class NewsFeed(generics.ListAPIView):
+    model = Post
+    serializer_class = PostSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+    def get_queryset(self):
+        userp = User.objects.get(pk = self.kwargs['userid'].strip()).profile
+        people = userp.followings.all()
+        acc = []
+        for person in people:
+            for post in person.post.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
+                acc.append(post)
+        acc.sort(key=lambda x: x.upload_date, reverse=True)
+        return acc
+
+class DeletePost(generics.DestroyAPIView):
+    model = Post
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = 'pk'
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+class UpdatePost(generics.UpdateAPIView):
+    model = Post
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = 'pk'
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+@csrf_exempt
+def AddFollowerPUT(request):
+    if request.method != 'PUT':
+        content = {'Only PUT requests are allowed'}
+        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    if not (len(request.body.replace(' ', '').split(',')) < 2):
+        username1 = request.body.replace(' ', '').replace('{','').split(',')[0]
+        username2 = request.body.replace(' ', '').replace('}','').split(',')[1]
+        if not User.objects.get(username=username1).profile.followers.filter(user__username=username2).exists():
+            User.objects.get(username=username1).profile.followings.add(User.objects.get(username=username2).profile)
+            User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
+            return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
+        else:
+            return HttpResponse({'Failed!'}, staus=status.HTTP_412_PRECONDITION_FAILED)
+    else:
+        return HttpResponse('Failed!', staus=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def RemoveFollowerPUT(request):
+    if request.method != 'PUT':
+        content = {'Only PUT requests are allowed'}
+    if not (len(request.body.replace(' ', '').split(',')) < 2):
+        username1 = request.body.replace(' ', '').replace('{','').split(',')[0]
+        username2 = request.body.replace(' ', '').replace('}','').split(',')[1]
+        if User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
+            User.objects.get(username=username1).profile.followings.remove(User.objects.get(username=username2).profile)
+            User.objects.get(username=username2).profile.followers.remove(User.objects.get(username=username1).profile)
+            return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
+        else:
+            return HttpResponse({'Failed!'}, staus=status.HTTP_412_PRECONDITION_FAILED)
+    else:
+        return HttpResponse('Failed!', staus=status.HTTP_400_BAD_REQUEST)
     
-class PostsOfUser(generics.ListCreateAPIView):
+class PostsOfUser(generics.ListAPIView):
     model = Post
     serializer_class = PostSerializer
     permission_classes = [
@@ -25,7 +100,7 @@ class PostsOfUser(generics.ListCreateAPIView):
         return user.profile.post.all()
 
 
-class PostsByIDs(generics.ListCreateAPIView):
+class PostsByIDs(generics.ListAPIView):
     model = Post
     serializer_class = PostSerializer
     permission_classes = [
@@ -44,7 +119,7 @@ class PostsByIDs(generics.ListCreateAPIView):
         return ret
 
 
-class ProfilesByIDs(generics.ListCreateAPIView):
+class ProfilesByIDs(generics.ListAPIView):
     model = UserProfile
     serializer_class = UserProfileReadSerializer
     permission_classes = [
@@ -63,7 +138,7 @@ class ProfilesByIDs(generics.ListCreateAPIView):
         return ret
 
 
-class SearchProfiles(generics.ListCreateAPIView):
+class SearchProfiles(generics.ListAPIView):
     model = UserProfile
     serializer_class = UserProfileReadSerializer
     permission_classes = [
@@ -91,7 +166,7 @@ class SearchProfiles(generics.ListCreateAPIView):
         return ret
 
 
-class ProfileByUsername(generics.ListCreateAPIView):
+class ProfileByUsername(generics.ListAPIView):
     model = UserProfile
     serializer_class = UserProfileReadSerializer
     permission_classes = [
