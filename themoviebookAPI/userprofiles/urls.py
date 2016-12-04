@@ -12,4 +12,6 @@ urlpatterns = [
 
     url(r'^posts/search/userid=(?P<id>.+)/$', views.PostsOfUser.as_view()),
     url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
+    
+    # url(r'^following/(?P<id>.+)following(?P<id>.+)/$'),
 ]

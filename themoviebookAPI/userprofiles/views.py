@@ -4,7 +4,8 @@ from rest_framework import generics, permissions
 from django.http import HttpResponseRedirect, HttpResponse
 
 from .models import UserProfile, Post
-from .serializers import UserProfileSerializer, RegistrationSerializer, PostSerializer
+from .serializers import UserProfileReadSerializer, UserProfileWriteSerializer
+from .serializers import RegistrationSerializer, PostSerializer
 from django.contrib.auth.models import User
 
 from django.db.models import Q
@@ -45,7 +46,7 @@ class PostsByIDs(generics.ListCreateAPIView):
 
 class ProfilesByIDs(generics.ListCreateAPIView):
     model = UserProfile
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileReadSerializer
     permission_classes = [
         permissions.AllowAny
     ]
@@ -64,7 +65,7 @@ class ProfilesByIDs(generics.ListCreateAPIView):
 
 class SearchProfiles(generics.ListCreateAPIView):
     model = UserProfile
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileReadSerializer
     permission_classes = [
         permissions.AllowAny
     ]
@@ -92,7 +93,7 @@ class SearchProfiles(generics.ListCreateAPIView):
 
 class ProfileByUsername(generics.ListCreateAPIView):
     model = UserProfile
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileReadSerializer
     permission_classes = [
         permissions.AllowAny
     ]
@@ -135,7 +136,6 @@ class PostList(generics.ListCreateAPIView):
 class ProfileList(generics.ListCreateAPIView):
     model = UserProfile
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
     permission_classes = [
         permissions.AllowAny
     ]
@@ -143,3 +143,9 @@ class ProfileList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         print 'ProfileList.perform_create called'
         serializer.save()
+
+    def get_serializer_class(self):
+        if self.request.method == ('POST' or 'PUT' or 'PATCH'):
+            return UserProfileWriteSerializer
+        else:
+            return UserProfileReadSerializer

@@ -9,8 +9,12 @@ class UserProfile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name = 'profile')
     bio = models.TextField(blank = True, null = True)
     birth_date = models.DateField(blank = True, null = True)
-    followings = models.ManyToManyField('self', related_name = 'follower', symmetrical=False, blank = True, null = True)
-    followers = models.ManyToManyField('self', related_name = 'following', symmetrical=False, blank = True, null = True)
+    followings = models.ManyToManyField('self', related_name = 'follower',
+                                        symmetrical=False, blank = True,
+                                        null = True)
+    followers = models.ManyToManyField('self', related_name = 'following',
+                                       symmetrical=False, blank = True,
+                                       null = True)
 
     def __unicode__(self):
         return self.user.username
