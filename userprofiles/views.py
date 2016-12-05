@@ -55,7 +55,15 @@ class UpdatePost(generics.UpdateAPIView):
     ]
 
 @csrf_exempt
-def AddFollowerPUT(request):
+def AddFollowerPUTX(request):
+    if request.method != 'PUT':
+        content = {'Only PUT requests are allowed'}
+        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    else:
+        return HttpResponse(request.body, status=status.HTTP_400_BAD_REQUEST)
+    
+@csrf_exempt
+def AddFollowerPUTX(request):
     if request.method != 'PUT':
         content = {'Only PUT requests are allowed'}
         return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
