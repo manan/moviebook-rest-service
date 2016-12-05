@@ -62,14 +62,14 @@ def AddFollowerPUT(request):
     if not (len(request.body.replace(' ', '').split(',')) < 2):
         username1 = request.body.replace(' ', '').replace('{','').split(',')[0]
         username2 = request.body.replace(' ', '').replace('}','').split(',')[1]
-        if not User.objects.get(username=username1).profile.followers.filter(user__username=username2).exists():
+        if not User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
             User.objects.get(username=username1).profile.followings.add(User.objects.get(username=username2).profile)
             User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
             return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
         else:
-            return HttpResponse({'Failed!'}, staus=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse({'Failed!'}, status=status.HTTP_412_PRECONDITION_FAILED)
     else:
-        return HttpResponse('Failed!', staus=status.HTTP_400_BAD_REQUEST)
+        return HttpResponse('Failed!', status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
 def RemoveFollowerPUT(request):
@@ -83,9 +83,9 @@ def RemoveFollowerPUT(request):
             User.objects.get(username=username2).profile.followers.remove(User.objects.get(username=username1).profile)
             return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
         else:
-            return HttpResponse({'Failed!'}, staus=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse({'Failed!'}, status=status.HTTP_412_PRECONDITION_FAILED)
     else:
-        return HttpResponse('Failed!', staus=status.HTTP_400_BAD_REQUEST)
+        return HttpResponse('Failed!', status=status.HTTP_400_BAD_REQUEST)
     
 class PostsOfUser(generics.ListAPIView):
     model = Post
