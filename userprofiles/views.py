@@ -59,12 +59,9 @@ def AddFollowerPUT(request):
     if request.method != 'PUT':
         content = {'Only PUT requests are allowed'}
         return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    body = request.body.replace('\s', '')
-    body = body.replace('{','')
-    body = body.replace('}','')
-    if len(body.split(',')) >= 2:
-        username1 = body.split(',')[0]
-        username2 = body.split(',')[1]
+    if len(request.body.split(',')) >= 2:
+        username1 = request.body.split(',')[0]
+        username2 = request.body.split(',')[1]
         if not User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
             User.objects.get(username=username1).profile.followings.add(User.objects.get(username=username2).profile)
             User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
@@ -78,9 +75,9 @@ def AddFollowerPUT(request):
 def RemoveFollowerPUT(request):
     if request.method != 'PUT':
         content = {'Only PUT requests are allowed'}
-    if not (len(request.body.replace(' ', '').split(',')) < 2):
-        username1 = request.body.replace(' ', '').replace('{','').split(',')[0]
-        username2 = request.body.replace(' ', '').replace('}','').split(',')[1]
+    if len(request.body.split(',')) >= 2:
+        username1 = request.body.split(',')[0]
+        username2 = request.body.split(',')[1]
         if User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
             User.objects.get(username=username1).profile.followings.remove(User.objects.get(username=username2).profile)
             User.objects.get(username=username2).profile.followers.remove(User.objects.get(username=username1).profile)
