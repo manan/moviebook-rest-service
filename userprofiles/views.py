@@ -64,7 +64,7 @@ def AddFollowerGET(request, username1, username2):
         return HttpResponse({'Failed!' + body}, status=status.HTTP_412_PRECONDITION_FAILED)
 
 @csrf_exempt
-def AddFollowerPUTx(request):
+def AddFollowerPUT(request):
     if request.method != 'PUT':
         content = {'Only PUT requests are allowed'}
         return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
