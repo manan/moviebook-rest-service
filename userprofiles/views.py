@@ -59,7 +59,7 @@ def AddFollowerPUT(request):
     if request.method != 'PUT':
         content = {'Only PUT requests are allowed'}
         return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    body = request.body.replace(' ', '')
+    body = request.body.replace('\s', '')
     body = body.replace('{','')
     body = body.replace('}','')
     if len(body.split(',')) >= 2:
