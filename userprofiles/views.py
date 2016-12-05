@@ -55,12 +55,13 @@ class UpdatePost(generics.UpdateAPIView):
     ]
 
 @csrf_exempt
-def AddFollowerPUT(request):
-    if request.method != 'PUT':
-        content = {'Only PUT requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+def AddFollowerGET(request, username1, username2):
+    if not User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
+        User.objects.get(username=username1).profile.followings.add(User.objects.get(username=username2).profile)
+        User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
+        return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
     else:
-        return HttpResponse(type(request.body), status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponse({'Failed!' + body}, status=status.HTTP_412_PRECONDITION_FAILED)
 
 @csrf_exempt
 def AddFollowerPUTx(request):

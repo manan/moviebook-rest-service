@@ -14,6 +14,7 @@ urlpatterns = [
 
     url(r'^profiles/follow/$', views.AddFollowerPUT),
     url(r'^profiles/follow/remove/$', views.RemoveFollowerPUT),
+    url(r'^profiles/follow/username1=(?P<username1>.+)&username2=(?P<username2>.+)/$', views.AddFollowerGET),
 
     url(r'^posts/update/postpk=(?P<pk>.+)/$', views.UpdatePost.as_view()),
 
