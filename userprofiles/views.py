@@ -59,25 +59,20 @@ def AddFollowerPUT(request):
     if request.method != 'PUT':
         content = {'Only PUT requests are allowed'}
         return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    else:
-        return HttpResponse(request.body, status=status.HTTP_400_BAD_REQUEST)
-    
-@csrf_exempt
-def AddFollowerPUTX(request):
-    if request.method != 'PUT':
-        content = {'Only PUT requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    if not (len(request.body.replace(' ', '').split(',')) < 2):
-        username1 = request.body.replace(' ', '').replace('{','').split(',')[0]
-        username2 = request.body.replace(' ', '').replace('}','').split(',')[1]
+    body = request.body.replace(' ', '')
+    body = body.replace('{','')
+    body = body.replace('}','')
+    if len(body.split(',')) >= 2:
+        username1 = body.split(',')[0]
+        username2 = body.split(',')[1]
         if not User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
             User.objects.get(username=username1).profile.followings.add(User.objects.get(username=username2).profile)
             User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
             return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
         else:
-            return HttpResponse({'Failed!'}, status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse({'Failed!' + body}, status=status.HTTP_412_PRECONDITION_FAILED)
     else:
-        return HttpResponse('Failed!', status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponse(request.body, status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
 def RemoveFollowerPUT(request):
