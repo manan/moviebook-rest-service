@@ -1,0 +1,1 @@
+web: gunicorn themoviebookAPI.wsgi
