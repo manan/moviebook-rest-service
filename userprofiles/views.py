@@ -193,7 +193,6 @@ class UserList(generics.ListCreateAPIView):
     ]
 
     def perform_create(self, serializer):
-        print 'UserList.perform_create called'
         serializer.save()
 
 class PostList(generics.ListCreateAPIView):
@@ -205,7 +204,6 @@ class PostList(generics.ListCreateAPIView):
     ]
 
     def perform_create(self, serializer):
-        print 'PostList.perform_create called'
         serializer.save()
     
 class ProfileList(generics.ListCreateAPIView):
@@ -216,7 +214,6 @@ class ProfileList(generics.ListCreateAPIView):
     ]
 
     def perform_create(self, serializer):
-        print 'ProfileList.perform_create called'
         serializer.save()
 
     def get_serializer_class(self):
