@@ -12,9 +12,8 @@ urlpatterns = [
     url(r'^posts/search/userid=(?P<id>.+)/$', views.PostsOfUser.as_view()),
     url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
 
-    url(r'^profiles/follow/$', views.AddFollowerPUT),
-    url(r'^profiles/follow/remove/$', views.RemoveFollowerPUT),
     url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/$', views.AddFollowerGET),
+    url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/remove/$', views.RemoveFollowerGET),
 
     url(r'^posts/update/postpk=(?P<pk>.+)/$', views.UpdatePost.as_view()),
 

@@ -61,7 +61,16 @@ def AddFollowerGET(request, username1, username2):
         User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
         return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
     else:
-        return HttpResponse({'Failed!' + body}, status=status.HTTP_412_PRECONDITION_FAILED)
+        return HttpResponse({'Failed!'}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+@csrf_exempt
+def RemoveFollowerGET(request, username1, username2):
+    if User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
+        User.objects.get(username=username1).profile.followings.remove(User.objects.get(username=username2).profile)
+        User.objects.get(username=username2).profile.followers.remove(User.objects.get(username=username1).profile)
+        return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
+    else:
+        return HttpResponse({'Failed!'}, status=status.HTTP_412_PRECONDITION_FAILED)
 
 @csrf_exempt
 def AddFollowerPUT(request):
