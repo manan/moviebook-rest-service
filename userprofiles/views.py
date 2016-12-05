@@ -59,6 +59,14 @@ def AddFollowerPUT(request):
     if request.method != 'PUT':
         content = {'Only PUT requests are allowed'}
         return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    else:
+        return HttpResponse(type(request.body), status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def AddFollowerPUTx(request):
+    if request.method != 'PUT':
+        content = {'Only PUT requests are allowed'}
+        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     if len(request.body.split(',')) >= 2:
         username1 = request.body.split(',')[0]
         username2 = request.body.split(',')[1]
