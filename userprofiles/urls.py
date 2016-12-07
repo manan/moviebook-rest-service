@@ -8,16 +8,20 @@ urlpatterns = [
     
     url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view()),
     url(r'^profiles/search/userids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view()),
-
+    url(r'^profiles/search/username=(?P<username>\w+)/$', views.ProfileByUsername.as_view()),
+    
     url(r'^posts/search/userid=(?P<id>.+)/$', views.PostsOfUser.as_view()),
     url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
 
     url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/$', views.AddFollowerGET),
-    url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/remove/$', views.RemoveFollowerGET),
+    url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/remove/$',
+        views.RemoveFollowerGET),
 
+    url(r'^profiles/update/userid=(?P<pk>\w+)/$', views.UpdateProfile.as_view()),
     url(r'^posts/update/postpk=(?P<pk>.+)/$', views.UpdatePost.as_view()),
-
+    url(r'^users/update/username=(?P<username>\w+)/$', views.UpdateUser.as_view()),
+    
     url(r'^posts/delete/postpk=(?P<pk>.+)/$', views.DeletePost.as_view()),
-
+    
     url(r'^newsfeed/userid=(?P<userid>.+)/$', views.NewsFeed.as_view()),
 ]
