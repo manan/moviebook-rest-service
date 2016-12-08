@@ -18,6 +18,28 @@ from django.db.models import Q
 from datetime import datetime
 from datetime import timedelta
 
+#### DONE
+## Sign up
+## Building profile
+## Modify bio, birth-date, first_name, last_name, username, email
+## Follow someone (works with GET, check with PATCH)
+## Searching for a user
+
+## Getting all the posts of a user for displaying his profile
+
+## Uploading a post
+## Modifying a post
+## Deleting a post
+
+## Getting posts for a newsfeed
+
+#### TODO
+## Changing password
+## Blocking a user
+## Change follower/following implementation
+
+
+### BRANCH OUT AND CHANGE IMPLEMENTATION! PRIMARY KEY USERNAME!
 # Create your views here.
 
 class NewsFeed(generics.ListAPIView): # DONE
@@ -56,7 +78,7 @@ class DeletePost(generics.DestroyAPIView): # DONE
 
     Required Keys for DELETE: none
 
-    On invalid pk: TODO
+    On invalid pk: {"detail":"Not found."}
     On invalid method: 405 Method not allowed
     """
     model = Post
