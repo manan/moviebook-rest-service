@@ -35,9 +35,10 @@ class UserProfile(models.Model):
         else:
             other = User.objects.get(username=username).profile
             self.blocked.add(other)
-            self.unfollow(other)
-            other.unfollow(self)
+            self.unfollow(username)
+            other.unfollow(self.user.username)
             self.save()
+            other.save()
             return True
 
     def unblock(self, username):
