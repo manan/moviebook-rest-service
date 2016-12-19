@@ -14,8 +14,8 @@ class UserProfile(models.Model):
                                         blank = True, null = True)
     blocked = models.ManyToManyField('self', related_name = 'blockedby', symmetrical=True,
                                      blank = True, null = True)
-    following_count = models.IntegerField(default=0)
-    follower_count = models.IntegerField(default=0)
+    following_count = models.IntegerField(default=0, blank = True, null = True)
+    follower_count = models.IntegerField(default=0, blank = True, null = True)
 
     def __unicode__(self):
         return self.user.username
