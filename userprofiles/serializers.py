@@ -12,17 +12,18 @@ class PostSerializer(serializers.ModelSerializer):
 class UserProfileReadSerializer(serializers.ModelSerializer):
     posts = PostSerializer(source = 'post', many = True)
     username = serializers.ReadOnlyField(source='user.username')
+    first_name = serializers.ReadOnlyField(source='user.first_name')
+    last_name = serializers.ReadOnlyField(source='user.last_name')
     class Meta:
         model = UserProfile
-        fields = ('user', 'username', 'bio', 'birth_date',
-                  'followings', 'followers', 'posts', 'id')
+        fields = ('user', 'username', 'first_name', 'last_name', 'bio', 'birth_date',
+                  'followings', 'followers', 'following_count', 'follower_count',
+                  'blocked', 'posts', 'id')
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
-    username = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = UserProfile
-        fields = ('user', 'username', 'bio', 'birth_date',
-                  'followings', 'followers', 'id')
+        fields = ('user', 'bio', 'birth_date')
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:

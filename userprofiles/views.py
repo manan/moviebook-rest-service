@@ -38,115 +38,11 @@ from datetime import timedelta
 ## Blocking a user
 ## Change follower/following implementation
 
-
-### BRANCH OUT AND CHANGE IMPLEMENTATION! PRIMARY KEY USERNAME!
 # Create your views here.
 
-class NewsFeed(generics.ListAPIView): # DONE
-    """
-    https://themoviebook.herokuapp.com/newsfeed/userid=<userid>/
-    GET request: returns the newsfeed for given user
-
-    Required Keys for GET: userid
-
-    On invalid userid: []
-    On invalid method: 405 Method not allowed
-    """
-    model = Post
-    serializer_class = PostSerializer
-    permission_classes = [
-        permissions.AllowAny
-    ]
-
-    def get_queryset(self):
-        try:
-            userp = User.objects.get(pk = self.kwargs['userid'].strip()).profile
-            people = userp.followings.all()
-            acc = []
-            for person in people:
-                for post in person.post.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
-                    acc.append(post)
-            acc.sort(key=lambda x: x.upload_date, reverse=True)
-            return acc
-        except Exception:
-            return set()
-
-class DeletePost(generics.DestroyAPIView): # DONE
-    """
-    https://themoviebook.herokuapp.com/posts/delete/postpk=<pk>/
-    DELETE request: deletes post with the given pk
-
-    Required Keys for DELETE: none
-
-    On invalid pk: {"detail":"Not found."}
-    On invalid method: 405 Method not allowed
-    """
-    model = Post
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
-    lookup_field = 'pk'
-    permission_classes = [
-        permissions.AllowAny
-    ]
-
-class UpdateUser(generics.UpdateAPIView): # DONE
-    """
-    https://themoviebook.herokuapp.com/users/update/username=<username>/
-    PATCH request: looks up user by username and modifies it according to body
-
-    Required Keys for PATCH: none except the ones you want to change
-
-    On invalid username: TODO
-    On invalid method: 405 Method not allowed
-    """
-    model = User
-    serializer_class = RegistrationSerializer
-    queryset = User.objects.all()
-    lookup_field = 'username'
-    permission_classes = [
-        permissions.AllowAny
-    ]
-
-class UpdatePost(generics.UpdateAPIView): # DONE
-    """
-    https://themoviebook.herokuapp.com/posts/update/postpk=<pk>/
-    PUT request: Updated the post with the given pk
-
-    Required Keys for PATCH: only the ones you want to change
-    Required Keys for PUT: owner and movie_id
-
-    On invalid pk: TODO
-    On invalid method: 405 Method not allowed
-    """
-    model = Post
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
-    lookup_field = 'pk'
-    permission_classes = [
-        permissions.AllowAny
-    ]
-
-class UpdateProfile(generics.UpdateAPIView): # DONE
-    """
-    https://themoviebook.herokuapp.com/profiles/update/userid=<pk>/
-    PATCH request: looks up profile by pk and modifies it according to body
-
-    Required Keys for PATCH: none except the ones you want to change
-    Required Keys for PUT: user
-
-    On invalid pk: TODO
-    On invalid method: 405 Method not allowed
-    """
-    model = UserProfile
-    serializer_class = UserProfileReadSerializer
-    queryset = UserProfile.objects.all()
-    lookup_field = 'pk'
-    permission_classes = [
-        permissions.AllowAny
-    ]
-
+#require_http_methods(['GET'])
 @csrf_exempt
-def AddFollowerGET(request, username1, username2): # DONE
+def Follow(request, username1, username2):
     """
     GET request: result -> username2 follows username1
 
@@ -157,101 +53,8 @@ def AddFollowerGET(request, username1, username2): # DONE
     If not formatted properly: 412 Precondition Failed
     If username2 doesn't follow username1: 412 Precondition Failed
     """
-    if request.method != 'GET':
-        content = {'Only GET requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    try:
-        if not User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
-            User.objects.get(username=username1).profile.followings.add(User.objects.get(username=username2).profile)
-            User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
-            return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
-        else:
-            return HttpResponse({'Failed!'}, status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-@csrf_exempt
-def RemoveFollowerGET(request, username1, username2): # DONE
-    """
-    GET request: result -> username2 unfollows username1
-
-    Required Keys for GET: username1, username2
-
-    On invalid username: 412 Precondition Failed
-    On invalid method: 405 Method not allowed
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
-    """
-    if request.method != 'GET':
-        content = {'Only GET requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    try:
-        if User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
-            User.objects.get(username=username1).profile.followings.remove(User.objects.get(username=username2).profile)
-            User.objects.get(username=username2).profile.followers.remove(User.objects.get(username=username1).profile)
-            return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
-        else:
-            return HttpResponse({'Failed!'}, status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-
-@csrf_exempt
-def AddFollowerPUT(request): # DONE
-    """
-    NOT IN USE
-    PUT request: result -> username2 follows username1
-
-    Required Keys for PUT body: {username1,username2}
-
-    On invalid username: Failed!
-    On invalid method: 405 Method not allowed 
-    If not formatted properly: 412 Precondition Failed
-    """
-    if request.method != 'PUT':
-        content = {'Only PUT requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    if len(request.body.split(',')) >= 2:
-        username1 = request.body.split(',')[0]
-        username2 = request.body.split(',')[1]
-        if not User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
-            User.objects.get(username=username1).profile.followings.add(User.objects.get(username=username2).profile)
-            User.objects.get(username=username2).profile.followers.add(User.objects.get(username=username1).profile)
-            return HttpResponse({'Done!'}, status=status.HTTP_200_OK)
-        else:
-            return HttpResponse({'Failed!' + body}, status=status.HTTP_412_PRECONDITION_FAILED)
-    else:
-        return HttpResponse(request.body, status=status.HTTP_400_BAD_REQUEST)
-
-@csrf_exempt
-def RemoveFollowerPUT(request): # DONE
-    """
-    NOT IN USE
-    PUT request: result -> username2 unfollows username1
-
-    Required Keys for PUT body: {username1,username2}
-
-    On invalid username: Failed!
-    On invalid method: 405 Method not allowed
-    If not formatted properly: 412 Precondition Failed
-    """
-    if request.method != 'PUT':
-        content = {'Only PUT requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    if len(request.body.split(',')) >= 2:
-        try:
-            username1 = request.body.split(',')[0]
-            username2 = request.body.split(',')[1]
-            if User.objects.get(username=username1).profile.followings.filter(user__username=username2).exists():
-                User.objects.get(username=username1).profile.followings.remove(User.objects.get(username=username2).profile)
-                User.objects.get(username=username2).profile.followers.remove(User.objects.get(username=username1).profile)
-                return HttpResponse('Done!', status=status.HTTP_200_OK)
-            else:
-                return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-        except Exception:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-    else:
-        return HttpResponse('Failed!', status=status.HTTP_400_BAD_REQUEST)
-    
+#require_http_methods(['GET'])
 class PostsOfUser(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/posts/search/userid=<id>/
@@ -271,11 +74,11 @@ class PostsOfUser(generics.ListAPIView): # DONE
     def get_queryset(self):
         id = self.kwargs['id'].strip()
         try:
-            return User.objects.get(pk=int(id)).post.all()
+            return User.objects.get(pk=int(id)).profile.post.all()
         except Exception:
             return set()
 
-
+#require_http_methods(['GET'])
 class PostsByIDs(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/posts/search/postids=<id1>,<id2>...<idn>/
@@ -303,7 +106,7 @@ class PostsByIDs(generics.ListAPIView): # DONE
                 pass
         return ret
 
-
+#require_http_methods(['GET'])
 class ProfilesByIDs(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/profiles/search/search/userids=<id1>,<id2>,..<idn>/
@@ -331,7 +134,7 @@ class ProfilesByIDs(generics.ListAPIView): # DONE
                 pass
         return ret
 
-
+#require_http_methods(['GET'])
 class SearchProfiles(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/profiles/search/name=<name>/
@@ -367,7 +170,7 @@ class SearchProfiles(generics.ListAPIView): # DONE
                 ret.add(every.profile)
         return ret
 
-
+#require_http_methods(['GET'])
 class ProfileByUsername(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/profiles/search/username=<username>/
@@ -387,13 +190,13 @@ class ProfileByUsername(generics.ListAPIView): # DONE
         uname = self.kwargs['username']
         ret = set()
         try:
-            user = User.objects.get(username = uname)
+            user = User.objects.get(username=uname)
             ret.add(user.profile)
         except (User.DoesNotExist):
             print ("Couldn't find a match")
         return ret
 
-
+#require_http_methods(['GET', 'POST'])
 class UserList(generics.ListCreateAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/users/
@@ -413,9 +216,14 @@ class UserList(generics.ListCreateAPIView): # DONE
         permissions.AllowAny
     ]
 
-    def perform_create(self, serializer):
-        serializer.save()
+    def perform_update(self, serializer):                                                           
+        if 'password' in self.request.data:
+            password = make_password(self.request.data['password'])                                 
+            serializer.save(password=password)                                                      
+        else:
+            serializer.save()
 
+#require_http_methods(['GET', 'POST'])
 class PostList(generics.ListCreateAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/posts/
@@ -436,9 +244,7 @@ class PostList(generics.ListCreateAPIView): # DONE
         permissions.AllowAny
     ]
 
-    def perform_create(self, serializer):
-        serializer.save()
-    
+#require_http_methods(['GET', 'POST'])
 class ProfileList(generics.ListCreateAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/profiles/
@@ -461,7 +267,7 @@ class ProfileList(generics.ListCreateAPIView): # DONE
         serializer.save()
 
     def get_serializer_class(self):
-        if self.request.method == ('POST' or 'PUT' or 'PATCH'):
+        print(self.request.method)
+        if (self.request.method == 'POST'):
             return UserProfileWriteSerializer
-        else:
-            return UserProfileReadSerializer
+        return UserProfileReadSerializer
