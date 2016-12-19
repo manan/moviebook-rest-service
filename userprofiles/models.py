@@ -33,21 +33,25 @@ class UserProfile(models.Model):
         if self.isBlocked(username):
             return False
         else:
-            self.blocked.add(User.objects.get(username=username).profile)
+            other = User.objects.get(username=username).profile
+            self.blocked.add(other)
+            self.unfollow(other)
+            other.unfollow(self)
             self.save()
             return True
 
     def unblock(self, username):
         if self.isBlocked(username):
-            return False
-        else:
             other = self.blocked.get(user__username=username)
             self.blocked.remove(other)
             self.save()
+            other.save()
             return True
+        else:
+            return False
 
     def follow(self, username):
-        if self.isFollowing(username):
+        if self.isFollowing(username) or self.isBlocked(username):
             return False
         else:
             other = User.objects.get(username=username).profile

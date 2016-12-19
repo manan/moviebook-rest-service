@@ -15,6 +15,8 @@ from django.views.decorators.http import require_http_methods
 
 from django.db.models import Q
 
+from django.contrib.auth.hashers import make_password
+
 from datetime import datetime
 from datetime import timedelta
 
@@ -24,16 +26,11 @@ from datetime import timedelta
 ## Modify bio, birth-date, first_name, last_name, username, email
 ## Follow someone (works with GET, check with PATCH)
 ## Searching for a user
-
 ## Getting all the posts of a user for displaying his profile
-
 ## Uploading a post
 ## Modifying a post
 ## Deleting a post
-
 ## Getting posts for a newsfeed
-
-#### TODO
 ## Changing password
 ## Blocking a user
 ## Change follower/following implementation
@@ -41,10 +38,125 @@ from datetime import timedelta
 # Create your views here.
 
 #require_http_methods(['GET'])
-@csrf_exempt
-def Follow(request, username1, username2):
+class NewsFeed(generics.ListAPIView):
     """
-    GET request: result -> username2 follows username1
+    https://themoviebook.herokuapp.com/newsfeed/userid=<userid>/
+    GET request: returns the newsfeed for given user
+
+    Required Keys for GET: userid
+
+    On invalid userid: []
+    On invalid method: 405 Method not allowed
+    """
+    model = Post
+    serializer_class = PostSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+    def get_queryset(self):
+        try:
+            userp = User.objects.get(pk = self.kwargs['userid'].strip()).profile
+            people = userp.followings.all()
+            acc = []
+            for person in people:
+                for post in person.post.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
+                    acc.append(post)
+            acc.sort(key=lambda x: x.upload_date, reverse=True)
+            return acc
+        except Exception:
+            return set()
+
+#require_http_methods(['PUT', 'PATCH'])
+class DeletePost(generics.DestroyAPIView): # DONE
+    """
+    https://themoviebook.herokuapp.com/posts/delete/postpk=<pk>/
+    DELETE request: deletes post with the given pk
+
+    Required Keys for DELETE: none
+
+    On invalid pk: {"detail":"Not found."}
+    On invalid method: 405 Method not allowed
+    """
+    model = Post
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = 'pk'
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+    #require_http_methods(['PUT', 'PATCH'])
+class UpdateUser(generics.UpdateAPIView): # DONE
+    """
+    https://themoviebook.herokuapp.com/users/update/username=<username>/
+    PATCH request: looks up user by username and modifies it according to body
+
+    Required Keys for PATCH: none except the ones you want to change
+
+    On invalid username: TODO
+    On invalid method: 405 Method not allowed
+    """
+    model = User
+    serializer_class = RegistrationSerializer
+    queryset = User.objects.all()
+    lookup_field = 'username'
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+    def perform_update(self, serializer):                                                           
+        if 'password' in self.request.data:
+            password = make_password(self.request.data['password'])                                 
+            serializer.save(password=password)                                                      
+        else:
+            serializer.save()
+    
+#require_http_methods(['PUT', 'PATCH'])
+class UpdatePost(generics.UpdateAPIView): # DONE
+    """
+    https://themoviebook.herokuapp.com/posts/update/postpk=<pk>/
+    PUT request: Updated the post with the given pk
+
+    Required Keys for PATCH: only the ones you want to change
+    Required Keys for PUT: owner and movie_id
+
+    On invalid pk: TODO
+    On invalid method: 405 Method not allowed
+    """
+    model = Post
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = 'pk'
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+#require_http_methods(['PUT', 'PATCH'])
+class UpdateProfile(generics.UpdateAPIView):
+    """
+    https://themoviebook.herokuapp.com/profiles/update/userid=<pk>/
+    PATCH request: looks up profile by pk and modifies it according to body
+
+    Required Keys for PATCH: none except the ones you want to change
+    Required Keys for PUT: user
+
+    On invalid pk: TODO
+    On invalid method: 405 Method not allowed
+    """
+    model = UserProfile
+    serializer_class = UserProfileReadSerializer
+    queryset = UserProfile.objects.all()
+    lookup_field = 'pk'
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+#require_http_methods(['GET'])
+@csrf_exempt
+def UnfollowGET(request, username1, username2):
+    """
+    GET request: result -> username1 unfollows username2
 
     Required Keys for GET: username1, username2
 
@@ -53,7 +165,97 @@ def Follow(request, username1, username2):
     If not formatted properly: 412 Precondition Failed
     If username2 doesn't follow username1: 412 Precondition Failed
     """
+    if request.method != 'GET':
+        content = 'Only GET requests are allowed'
+        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    try:
+        userp = UserProfile.objects.get(user__username=username1)
+        bool = userp.unfollow(username2)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
+#require_http_methods(['GET'])
+@csrf_exempt
+def FollowGET(request, username1, username2):
+    """
+    GET request: result -> username1 follows username2
+
+    Required Keys for GET: username1, username2
+
+    On invalid username: 412 Precondition Failed
+    On invalid method: 405 Method not allowed 
+    If not formatted properly: 412 Precondition Failed
+    If username2 doesn't follow username1: 412 Precondition Failed
+    """
+    if request.method != 'GET':
+        content = {'Only GET requests are allowed'}
+        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    try:
+        userp = UserProfile.objects.get(user__username=username1)
+        bool = userp.follow(username2)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+
+#require_http_methods(['GET'])
+@csrf_exempt
+def UnblockGET(request, username1, username2):
+    """
+    GET request: result -> username1 unblocks username2
+
+    Required Keys for GET: username1, username2
+
+    On invalid username: 412 Precondition Failed
+    On invalid method: 405 Method not allowed 
+    If not formatted properly: 412 Precondition Failed
+    If username2 doesn't follow username1: 412 Precondition Failed
+    """
+    if request.method != 'GET':
+        content = 'Only GET requests are allowed'
+        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    try:
+        userp = UserProfile.objects.get(user__username=username1)
+        bool = userp.unblock(username2)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+
+#require_http_methods(['GET'])
+@csrf_exempt
+def BlockGET(request, username1, username2):
+    """
+    GET request: result -> username1 follows username2
+
+    Required Keys for GET: username1, username2
+
+    On invalid username: 412 Precondition Failed
+    On invalid method: 405 Method not allowed 
+    If not formatted properly: 412 Precondition Failed
+    If username2 doesn't follow username1: 412 Precondition Failed
+    """
+    if request.method != 'GET':
+        content = {'Only GET requests are allowed'}
+        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    try:
+        userp = UserProfile.objects.get(user__username=username1)
+        bool = userp.block(username2)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    
 #require_http_methods(['GET'])
 class PostsOfUser(generics.ListAPIView): # DONE
     """
@@ -215,13 +417,6 @@ class UserList(generics.ListCreateAPIView): # DONE
     permission_classes = [
         permissions.AllowAny
     ]
-
-    def perform_update(self, serializer):                                                           
-        if 'password' in self.request.data:
-            password = make_password(self.request.data['password'])                                 
-            serializer.save(password=password)                                                      
-        else:
-            serializer.save()
 
 #require_http_methods(['GET', 'POST'])
 class PostList(generics.ListCreateAPIView): # DONE

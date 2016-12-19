@@ -13,14 +13,17 @@ urlpatterns = [
     url(r'^posts/search/userid=(?P<id>.+)/$', views.PostsOfUser.as_view()),
     url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
 
-    #url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/$', views.FollowGET),
-    #url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/remove/$', views.UnfollowGET),
+    url(r'^profiles/follow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/$', views.FollowGET),
+    url(r'^profiles/unfollow/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/$', views.UnfollowGET),
 
-    #url(r'^profiles/update/userid=(?P<pk>\w+)/$', views.UpdateProfile.as_view()),
-    #url(r'^posts/update/postpk=(?P<pk>.+)/$', views.UpdatePost.as_view()),
-    #url(r'^users/update/username=(?P<username>\w+)/$', views.UpdateUser.as_view()),
+    url(r'^profiles/block/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/$', views.BlockGET),
+    url(r'^profiles/unblock/username1=(?P<username1>\w+)/username2=(?P<username2>\w+)/$', views.UnblockGET),
+
+    url(r'^profiles/update/userid=(?P<pk>\w+)/$', views.UpdateProfile.as_view()),
+    url(r'^posts/update/postpk=(?P<pk>.+)/$', views.UpdatePost.as_view()),
+    url(r'^users/update/username=(?P<username>\w+)/$', views.UpdateUser.as_view()),
     
-    #url(r'^posts/delete/postpk=(?P<pk>.+)/$', views.DeletePost.as_view()),
+    url(r'^posts/delete/postpk=(?P<pk>.+)/$', views.DeletePost.as_view()),
     
-    #url(r'^newsfeed/userid=(?P<userid>.+)/$', views.NewsFeed.as_view()),
+    url(r'^newsfeed/userid=(?P<userid>.+)/$', views.NewsFeed.as_view()),
 ]
