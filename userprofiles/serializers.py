@@ -10,7 +10,7 @@ class PostSerializer(serializers.ModelSerializer):
                   'upload_date', 'id')
     
 class UserProfileReadSerializer(serializers.ModelSerializer):
-    posts = PostSerializer(source = 'post', many = True)
+    # posts = PostSerializer(source = 'post', many = True)
     username = serializers.ReadOnlyField(source='user.username')
     first_name = serializers.ReadOnlyField(source='user.first_name')
     last_name = serializers.ReadOnlyField(source='user.last_name')
@@ -18,7 +18,7 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ('user', 'username', 'first_name', 'last_name', 'bio', 'birth_date',
                   'followings', 'followers', 'following_count', 'follower_count',
-                  'blocked', 'blockedby', 'posts', 'id')
+                  'blocked', 'blockedby', 'id')
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
     class Meta:

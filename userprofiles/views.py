@@ -459,6 +459,61 @@ class ProfileByUsername(generics.ListAPIView): # DONE
             print ("Couldn't find a match")
         return ret
 
+#require_http_methods(['POST'])
+class AddUser(generics.CreateAPIView): # DONE
+    """
+    https://themoviebook.herokuapp.com/users/
+    POST request body {"username":<>, "password":<>, "email":<>, "first_name":<>, "last_name":<>}
+    adds user to the db
+
+    Required Keys for POST: username, password, email, first_name, last_name
+
+    On used username: {"username":["A user with that username already exists."]}
+    On missing any fields: 500 Internal Server Error
+    """
+    model = User
+    serializer_class = RegistrationSerializer
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+#require_http_methods(['POST'])
+class AddPost(generics.CreateAPIView): # DONE
+    """
+    https://themoviebook.herokuapp.com/posts/
+    POST request body {"user":<id>, "movie_title":<bio>, "movie_id":"<imdbid>", "caption":"<cap>"}
+    adds post (with owner being the user specified) to the db
+
+    Required Keys for POST: user, movie_id
+
+    On invalid user: {"user":["Invalid pk \"4\" - object does not exist."]}
+    On missing movie_id field: {"movie_id":["This field is required."]}
+    On missing owner field: {"owner":["This field is required."]}
+    """
+    model = Post
+    serializer_class = PostSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+#require_http_methods(['POST'])
+class AddProfile(generics.CreateAPIView): # DONE
+    """
+    https://themoviebook.herokuapp.com/profiles/add/
+    POST request body {"user":<id>, "bio":<bio>, "birth_date":"<YYYY-MM-DD>"} adds profile to db
+
+    Required Keys for POST: user
+
+    On collision: {"user":["This field must be unique."]}
+    """
+    model = UserProfile
+    serializer_class = UserProfileWriteSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
 #require_http_methods(['GET', 'POST'])
 class UserList(generics.ListCreateAPIView): # DONE
     """
@@ -476,7 +531,7 @@ class UserList(generics.ListCreateAPIView): # DONE
     queryset = User.objects.all()
     serializer_class = RegistrationSerializer
     permission_classes = [
-        permissions.AllowAny,
+        permissions.IsAdminUser,
     ]
 
 #require_http_methods(['GET', 'POST'])
@@ -498,7 +553,7 @@ class PostList(generics.ListCreateAPIView): # DONE
     serializer_class = PostSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
+        permissions.IsAdminUser,
     ]
 
 #require_http_methods(['GET', 'POST'])
@@ -518,7 +573,7 @@ class ProfileList(generics.ListCreateAPIView): # DONE
     queryset = UserProfile.objects.all()
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
+        permissions.IsAdminUser,
     ]
     
     def get_serializer_class(self):
