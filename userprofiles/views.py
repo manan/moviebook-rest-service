@@ -8,17 +8,25 @@ from rest_framework import status
 from .models import UserProfile, Post
 from .serializers import UserProfileReadSerializer, UserProfileWriteSerializer
 from .serializers import RegistrationSerializer, PostSerializer
+from .permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from rest_framework.decorators import api_view
+from rest_framework.decorators import authentication_classes
+from rest_framework.decorators import permission_classes
 
 from django.db.models import Q
 
 from django.contrib.auth.hashers import make_password
 
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+
 from datetime import datetime
 from datetime import timedelta
+        
 
 #### DONE
 ## Sign up
@@ -51,13 +59,14 @@ class NewsFeed(generics.ListAPIView):
     """
     model = Post
     serializer_class = PostSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated
     ]
 
     def get_queryset(self):
         try:
-            userp = User.objects.get(pk = self.kwargs['userid'].strip()).profile
+            userp = request.user.profile
             people = userp.followings.all()
             acc = []
             for person in people:
@@ -68,8 +77,8 @@ class NewsFeed(generics.ListAPIView):
         except Exception:
             return set()
 
-#require_http_methods(['PUT', 'PATCH'])
-class DeletePost(generics.DestroyAPIView): # DONE
+#require_http_methods(['DELETE'])
+class DeletePost(generics.DestroyAPIView): # PERMISSION ONLY IF OWNER
     """
     https://themoviebook.herokuapp.com/posts/delete/postpk=<pk>/
     DELETE request: deletes post with the given pk
@@ -78,16 +87,19 @@ class DeletePost(generics.DestroyAPIView): # DONE
 
     On invalid pk: {"detail":"Not found."}
     On invalid method: 405 Method not allowed
+    On illegal user (not owner): { "detail": "You do not have permission to perform this action." }
     """
     model = Post
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     lookup_field = 'pk'
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated,
+        IsOwnerOrReadOnly,
     ]
 
-    #require_http_methods(['PUT', 'PATCH'])
+#require_http_methods(['PUT', 'PATCH'])
 class UpdateUser(generics.UpdateAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/users/update/username=<username>/
@@ -101,9 +113,9 @@ class UpdateUser(generics.UpdateAPIView): # DONE
     model = User
     serializer_class = RegistrationSerializer
     queryset = User.objects.all()
-    lookup_field = 'username'
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated
     ]
 
     def perform_update(self, serializer):                                                           
@@ -112,9 +124,12 @@ class UpdateUser(generics.UpdateAPIView): # DONE
             serializer.save(password=password)                                                      
         else:
             serializer.save()
+
+    def get_object(self):
+        return self.request.user
     
 #require_http_methods(['PUT', 'PATCH'])
-class UpdatePost(generics.UpdateAPIView): # DONE
+class UpdatePost(generics.UpdateAPIView): # PERMISSION ONLY IF OWNER
     """
     https://themoviebook.herokuapp.com/posts/update/postpk=<pk>/
     PUT request: Updated the post with the given pk
@@ -124,20 +139,24 @@ class UpdatePost(generics.UpdateAPIView): # DONE
 
     On invalid pk: TODO
     On invalid method: 405 Method not allowed
+    On illegal user (not owner): { "detail": "You do not have permission to perform this action." }
     """
     model = Post
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
     lookup_field = 'pk'
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated,
+        IsOwnerOrReadOnly
     ]
 
+    def get_queryset(self):
+        return self.request.user.profile.post.all()
+
 #require_http_methods(['PUT', 'PATCH'])
-class UpdateProfile(generics.UpdateAPIView):
+class UpdateProfile(generics.UpdateAPIView): # DONE
     """
-    https://themoviebook.herokuapp.com/profiles/update/userid=<pk>/
-    PATCH request: looks up profile by pk and modifies it according to body
+    https://themoviebook.herokuapp.com/profiles/update/
+    PATCH request: looks up profile by token and modifies it according to body
 
     Required Keys for PATCH: none except the ones you want to change
     Required Keys for PUT: user
@@ -148,30 +167,33 @@ class UpdateProfile(generics.UpdateAPIView):
     model = UserProfile
     serializer_class = UserProfileReadSerializer
     queryset = UserProfile.objects.all()
-    lookup_field = 'pk'
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated
     ]
 
+    def get_object(self):
+        return self.request.user.profile
+
 #require_http_methods(['GET'])
 @csrf_exempt
-def UnfollowGET(request, username1, username2):
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
+def UnfollowGET(request, username):
     """
-    GET request: result -> username1 unfollows username2
+    GET request: result: authenticated user unfollows user w username
 
-    Required Keys for GET: username1, username2
+    Required Keys for GET: username
 
     On invalid username: 412 Precondition Failed
     On invalid method: 405 Method not allowed 
     If not formatted properly: 412 Precondition Failed
     If username2 doesn't follow username1: 412 Precondition Failed
     """
-    if request.method != 'GET':
-        content = 'Only GET requests are allowed'
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     try:
-        userp = UserProfile.objects.get(user__username=username1)
-        bool = userp.unfollow(username2)
+        userp = request.user.profile
+        bool = userp.unfollow(username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -181,23 +203,23 @@ def UnfollowGET(request, username1, username2):
 
 #require_http_methods(['GET'])
 @csrf_exempt
-def FollowGET(request, username1, username2):
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,)) 
+def FollowGET(request, username):
     """
-    GET request: result -> username1 follows username2
+    GET request: result: authenticated user follows user w username
 
-    Required Keys for GET: username1, username2
+    Required Keys for GET: username
 
     On invalid username: 412 Precondition Failed
     On invalid method: 405 Method not allowed 
     If not formatted properly: 412 Precondition Failed
     If username2 doesn't follow username1: 412 Precondition Failed
     """
-    if request.method != 'GET':
-        content = {'Only GET requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     try:
-        userp = UserProfile.objects.get(user__username=username1)
-        bool = userp.follow(username2)
+        userp = request.user.profile
+        bool = userp.follow(username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -207,23 +229,23 @@ def FollowGET(request, username1, username2):
 
 #require_http_methods(['GET'])
 @csrf_exempt
-def UnblockGET(request, username1, username2):
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
+def UnblockGET(request, username):
     """
-    GET request: result -> username1 unblocks username2
+    GET request: result: authenticated user unblocks user w username
 
-    Required Keys for GET: username1, username2
+    Required Keys for GET: username
 
     On invalid username: 412 Precondition Failed
     On invalid method: 405 Method not allowed 
     If not formatted properly: 412 Precondition Failed
     If username2 doesn't follow username1: 412 Precondition Failed
     """
-    if request.method != 'GET':
-        content = 'Only GET requests are allowed'
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     try:
-        userp = UserProfile.objects.get(user__username=username1)
-        bool = userp.unblock(username2)
+        userp = request.user.profile
+        bool = userp.unblock(username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -233,32 +255,32 @@ def UnblockGET(request, username1, username2):
 
 #require_http_methods(['GET'])
 @csrf_exempt
-def BlockGET(request, username1, username2):
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
+def BlockGET(request, username):
     """
-    GET request: result -> username1 follows username2
+    GET request: result: authenticated user blocks user w given username
 
-    Required Keys for GET: username1, username2
+    Required Keys for GET: username
 
     On invalid username: 412 Precondition Failed
     On invalid method: 405 Method not allowed 
     If not formatted properly: 412 Precondition Failed
     If username2 doesn't follow username1: 412 Precondition Failed
     """
-    if request.method != 'GET':
-        content = {'Only GET requests are allowed'}
-        return HttpResponse(content, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     try:
-        userp = UserProfile.objects.get(user__username=username1)
-        bool = userp.block(username2)
+        userp = request.user.profile
+        bool = userp.block(username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
             return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-    
+
 #require_http_methods(['GET'])
-class PostsOfUser(generics.ListAPIView): # DONE
+class PostsByUserId(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/posts/search/userid=<id>/
     GET request fetches all the posts of a certain user
@@ -270,14 +292,48 @@ class PostsOfUser(generics.ListAPIView): # DONE
     """
     model = Post
     serializer_class = PostSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated,
     ]
 
     def get_queryset(self):
-        id = self.kwargs['id'].strip()
         try:
-            return User.objects.get(pk=int(id)).profile.post.all()
+            queryuser = User.objects.get(pk=self.kwargs['userid']).profile
+            mainuser = self.request.user.profile
+            if mainuser.isBlocked(queryuser) or mainuser.isBlockedBy(queryuser):
+                return set()
+            else:
+                return queryuser.post.all()
+        except Exception:
+            return set()
+
+#require_http_methods(['GET'])
+class PostsByUsername(generics.ListAPIView): # DONE
+    """
+    https://themoviebook.herokuapp.com/posts/search/username=<id>/
+    GET request fetches all the posts of a certain user
+
+    Required Keys for GET: <username>
+
+    On invalid user: []
+    No ids mentioned: 404 Page not found
+    """
+    model = Post
+    serializer_class = PostSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def get_queryset(self):
+        try:
+            queryuser = User.objects.get(username=self.kwargs['username']).profile
+            mainuser = self.request.user.profile
+            if mainuser.isBlocked(queryuser) or mainuser.isBlockedBy(queryuser):
+                return set()
+            else:
+                return queryuser.post.all()
         except Exception:
             return set()
 
@@ -294,8 +350,9 @@ class PostsByIDs(generics.ListAPIView): # DONE
     """
     model = Post
     serializer_class = PostSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticatedOrReadOnly,
     ]
 
     def get_queryset(self):
@@ -322,8 +379,9 @@ class ProfilesByIDs(generics.ListAPIView): # DONE
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticatedOrReadOnly,
     ]
 
     def get_queryset(self):
@@ -349,8 +407,9 @@ class SearchProfiles(generics.ListAPIView): # DONE
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticatedOrReadOnly,
     ]
 
     def get_queryset(self):
@@ -385,8 +444,9 @@ class ProfileByUsername(generics.ListAPIView): # DONE
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticatedOrReadOnly,
     ]
 
     def get_queryset(self):
@@ -416,7 +476,7 @@ class UserList(generics.ListCreateAPIView): # DONE
     queryset = User.objects.all()
     serializer_class = RegistrationSerializer
     permission_classes = [
-        permissions.AllowAny
+        permissions.AllowAny,
     ]
 
 #require_http_methods(['GET', 'POST'])
@@ -436,8 +496,9 @@ class PostList(generics.ListCreateAPIView): # DONE
     model = Post
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticatedOrReadOnly,
     ]
 
 #require_http_methods(['GET', 'POST'])
@@ -455,15 +516,12 @@ class ProfileList(generics.ListCreateAPIView): # DONE
     """
     model = UserProfile
     queryset = UserProfile.objects.all()
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticatedOrReadOnly,
     ]
-
-    def perform_create(self, serializer):
-        serializer.save()
-
+    
     def get_serializer_class(self):
-        print(self.request.method)
         if (self.request.method == 'POST'):
             return UserProfileWriteSerializer
         return UserProfileReadSerializer

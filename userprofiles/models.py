@@ -4,6 +4,11 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+
 # Create your models here.
 
 class UserProfile(models.Model):
@@ -12,7 +17,7 @@ class UserProfile(models.Model):
     birth_date = models.DateField(blank = True, null = True)
     followings = models.ManyToManyField('self', related_name = 'followers', symmetrical=False,
                                         blank = True, null = True)
-    blocked = models.ManyToManyField('self', related_name = 'blockedby', symmetrical=True,
+    blocked = models.ManyToManyField('self', related_name = 'blockedby', symmetrical=False,
                                      blank = True, null = True)
     following_count = models.IntegerField(default=0, blank = True, null = True)
     follower_count = models.IntegerField(default=0, blank = True, null = True)
@@ -29,6 +34,9 @@ class UserProfile(models.Model):
     def isBlocked(self, username):
         return self.blocked.filter(user__username=username).exists()
 
+    def isBlockedBy(self, username):
+        return self.blockedby.filter(user__username=username).exists()
+    
     def block(self, username):
         if self.isBlocked(username):
             return False
@@ -78,6 +86,11 @@ class UserProfile(models.Model):
             return True
         else:
            return False
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
     
 class Post(models.Model):
     owner = models.ForeignKey(UserProfile, related_name = 'post')

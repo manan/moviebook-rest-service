@@ -18,7 +18,7 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ('user', 'username', 'first_name', 'last_name', 'bio', 'birth_date',
                   'followings', 'followers', 'following_count', 'follower_count',
-                  'blocked', 'posts', 'id')
+                  'blocked', 'blockedby', 'posts', 'id')
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
     class Meta:
