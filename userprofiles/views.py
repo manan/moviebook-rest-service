@@ -530,6 +530,7 @@ class UserList(generics.ListCreateAPIView): # DONE
     model = User
     queryset = User.objects.all()
     serializer_class = RegistrationSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAdminUser,
     ]
