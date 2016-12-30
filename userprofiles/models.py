@@ -9,10 +9,20 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
+import os
+from django.conf import settings
+
 # Create your models here.
 
+def upload_location_rm_dup(instance, filename):
+    imgname =  '%s.jpg' %(instance.user)
+    path = os.path.join(settings.MEDIA_ROOT, imgname)
+    if os.path.exists(path):
+        os.remove(path)
+    return imgname
+
 def upload_location(instance, filename):
-    return "%s/%s" %(instance.user, filename)
+    return '%s.jpg' %(instance.user)
 
 class UserProfile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name = 'profile')

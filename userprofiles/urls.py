@@ -43,6 +43,6 @@ urlpatterns = [
     # SPECIAL PURPOSE
     url(r'^newsfeed/$', views.NewsFeed.as_view()),
     url(r'^token-auth/$', view.obtain_auth_token),
-    url(r'^upload/filename=(?P<filename>.+)/$', views.ProfilePicture.as_view())
+    url(r'^profilepicture/upload/$', views.ProfilePicture.as_view())
     
 ]

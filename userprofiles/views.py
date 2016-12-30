@@ -11,7 +11,7 @@ from .serializers import RegistrationSerializer, PostSerializer
 from .permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 
 from django.views.decorators.csrf import csrf_exempt
@@ -49,17 +49,25 @@ from datetime import timedelta
 
 # Create your views here.
 
-
 class ProfilePicture(APIView):
-    parser_classes = (FileUploadParser,)
+    """
+    https://themoviebook.herokuapp.com/profilepicture/upload/
+    POST Request:
+    curl -i -H "Authorization: Token e0e4a26da62d55c0b017138dfd3f18b96a9fe58a" -F "file=@icon.jpg" 
+    http://127.0.0.1:8000/profilepicture/upload/
+    
+    To upload a profile picture for authenticated user
+    """
+    parser_classes = (FormParser, MultiPartParser)
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated
     ]
 
-    def post(self, request, filename, format=None):
-        file_obj = request.data['file']
+    def post(self, request, format=None):
+        file_obj = request.FILES['file']
         userprofile = request.user.profile
+        userprofile.profile_picture.delete()
         userprofile.profile_picture = file_obj
         userprofile.save()
         return Response(status=204)
@@ -479,7 +487,8 @@ class ProfileByUsername(generics.ListAPIView): # DONE
 
 class SearchUser(generics.RetrieveAPIView):
     """
-    https://
+    https://themoviebook.herokuapp.com/users/search/
+    GET: returns serialized authenticated user object
     """
     model = User
     serializer_class = RegistrationSerializer
