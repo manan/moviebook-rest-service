@@ -1,4 +1,4 @@
-cd ~/Desktop/TheMovieBook/themoviebookAPI/userprofiles/
+cd ~/Desktop/TheMovieBookAPI/themoviebookAPI/userprofiles/
 
 rm *.pyc
 rm *.py~

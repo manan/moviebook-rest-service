@@ -13,10 +13,13 @@ urlpatterns = [
     url('^profiles/add/$', views.AddProfile.as_view()),
     url('^posts/add/$', views.AddPost.as_view()),
 
-    # SEARCH USERS
-    url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view(), name='FilterByName'),
-    url(r'^profiles/search/userids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view(), name='FilterByIDs'),
-    url(r'^profiles/search/username=(?P<username>\w+)/$', views.ProfileByUsername.as_view(), name='MatchUsername'),
+    # GET USER DETAILS
+    url(r'^users/fetchdetails/$', views.SearchUser.as_view()),
+
+    # SEARCH USERPROFILES
+    url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view()),
+    url(r'^profiles/search/userids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view()),
+    url(r'^profiles/search/username=(?P<username>\w+)/$', views.ProfileByUsername.as_view()),
 
     # SEARCH POSTS
     url(r'^posts/search/username=(?P<username>.+)/$', views.PostsByUsername.as_view()),
@@ -39,6 +42,7 @@ urlpatterns = [
 
     # SPECIAL PURPOSE
     url(r'^newsfeed/$', views.NewsFeed.as_view()),
-    url(r'^token-auth/', view.obtain_auth_token)
+    url(r'^token-auth/$', view.obtain_auth_token),
+    url(r'^upload/filename=(?P<filename>.+)/$', views.ProfilePicture.as_view())
     
 ]

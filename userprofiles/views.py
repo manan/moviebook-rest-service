@@ -11,6 +11,9 @@ from .serializers import RegistrationSerializer, PostSerializer
 from .permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 
+from rest_framework.parsers import FileUploadParser
+from rest_framework.views import APIView
+
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from rest_framework.decorators import api_view
@@ -45,6 +48,21 @@ from datetime import timedelta
 ## DEBUGGING
 
 # Create your views here.
+
+
+class ProfilePicture(APIView):
+    parser_classes = (FileUploadParser,)
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]
+
+    def post(self, request, filename, format=None):
+        file_obj = request.data['file']
+        userprofile = request.user.profile
+        userprofile.profile_picture = file_obj
+        userprofile.save()
+        return Response(status=204)
 
 #require_http_methods(['GET'])
 class NewsFeed(generics.ListAPIView):
@@ -458,6 +476,20 @@ class ProfileByUsername(generics.ListAPIView): # DONE
         except (User.DoesNotExist):
             print ("Couldn't find a match")
         return ret
+
+class SearchUser(generics.RetrieveAPIView):
+    """
+    https://
+    """
+    model = User
+    serializer_class = RegistrationSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def get_object(self):
+        return self.request.user
 
 #require_http_methods(['POST'])
 class AddUser(generics.CreateAPIView): # DONE

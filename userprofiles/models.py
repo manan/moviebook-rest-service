@@ -11,10 +11,14 @@ from rest_framework.authtoken.models import Token
 
 # Create your models here.
 
+def upload_location(instance, filename):
+    return "%s/%s" %(instance.user, filename)
+
 class UserProfile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name = 'profile')
     bio = models.TextField(blank = True, null = True)
     birth_date = models.DateField(blank = True, null = True)
+    profile_picture = models.FileField(upload_to = upload_location, blank = True, null = True) 
     followings = models.ManyToManyField('self', related_name = 'followers', symmetrical=False,
                                         blank = True, null = True)
     blocked = models.ManyToManyField('self', related_name = 'blockedby', symmetrical=False,
