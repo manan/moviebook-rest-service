@@ -108,7 +108,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
     
 class Post(models.Model):
     owner = models.ForeignKey(UserProfile, related_name = 'post')
-    movie_title = models.CharField(max_length = 200, null = True, blank = True)
+    movie_title = models.CharField(max_length = 200)
     movie_id = models.CharField(max_length = 20)
     caption = models.CharField(max_length = 200, blank = True, null = True)
     upload_date = models.DateTimeField(auto_now_add=True)

@@ -18,12 +18,12 @@ urlpatterns = [
 
     # SEARCH USERPROFILES
     url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view()),
-    url(r'^profiles/search/userids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view()),
+    url(r'^profiles/search/userpids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view()),
     url(r'^profiles/search/username=(?P<username>\w+)/$', views.ProfileByUsername.as_view()),
 
     # SEARCH POSTS
     url(r'^posts/search/username=(?P<username>.+)/$', views.PostsByUsername.as_view()),
-    url(r'^posts/search/userid=(?P<userid>.+)/$', views.PostsByUserId.as_view()),
+    url(r'^posts/search/userpid=(?P<userpid>.+)/$', views.PostsByUserPId.as_view()),
     url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
 
     # FOLLOW/UNFOLLOW/BLOCK/UNBLOCK USERS
