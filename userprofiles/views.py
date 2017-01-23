@@ -9,6 +9,7 @@ from .models import UserProfile, Post
 from .serializers import UserProfileReadSerializer, UserProfileWriteSerializer
 from .serializers import RegistrationSerializer, PostSerializer
 from .permissions import IsOwnerOrReadOnly
+from .permissions import IsUserOfProfileBeingCreated
 from django.contrib.auth.models import User
 
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -306,7 +307,7 @@ def BlockGET(request, username):
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
 #require_http_methods(['GET'])
-class PostsByUserId(generics.ListAPIView): # DONE
+class PostsByUserPId(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/posts/search/userid=<id>/
     GET request fetches all the posts of a certain user
@@ -500,10 +501,10 @@ class SearchUser(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
-#require_http_methods(['POST'])
-class AddUser(generics.CreateAPIView): # DONE
+#['POST']
+class AddUser(generics.CreateAPIView):
     """
-    https://themoviebook.herokuapp.com/users/
+    https://themoviebook.herokuapp.com/users/add/
     POST request body {"username":<>, "password":<>, "email":<>, "first_name":<>, "last_name":<>}
     adds user to the db
 
@@ -518,55 +519,56 @@ class AddUser(generics.CreateAPIView): # DONE
         permissions.AllowAny,
     ]
 
-#require_http_methods(['POST'])
-class AddPost(generics.CreateAPIView): # DONE
+#['POST']
+class AddPost(generics.CreateAPIView): # NOT TESTED
     """
-    https://themoviebook.herokuapp.com/posts/
-    POST request body {"user":<id>, "movie_title":<bio>, "movie_id":"<imdbid>", "caption":"<cap>"}
-    adds post (with owner being the user specified) to the db
+    https://themoviebook.herokuapp.com/posts/add/
+    POST request body: {"owner":<userpid>, "movie_title":<bio>, "movie_id":"<imdbid>", "caption":"<cap>"}
+    adds post (with owner being the userp specified) to the db
 
     Required Keys for POST: user, movie_id
 
     On invalid user: {"user":["Invalid pk \"4\" - object does not exist."]}
     On missing movie_id field: {"movie_id":["This field is required."]}
     On missing owner field: {"owner":["This field is required."]}
+    On denied permission: {...}
     """
     model = Post
     serializer_class = PostSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
+        IsOwnerOrReadOnly,
     ]
 
-#require_http_methods(['POST'])
-class AddProfile(generics.CreateAPIView): # DONE
+#['POST']
+class AddProfile(generics.CreateAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/add/
-    POST request body {"user":<id>, "bio":<bio>, "birth_date":"<YYYY-MM-DD>"} adds profile to db
+    POST request body: {"user":<userid>, "bio":<bio>, "birth_date":"<YYYY-MM-DD>"}
+    adds profile to db
 
     Required Keys for POST: user
 
-    On collision: {"user":["This field must be unique."]}
+    If user id already has a profile: {"user":["This field must be unique."]}
+    On invalid user: {"user":["Invalid pk \"4\" - object does not exist."]}
+    On denied permission: {...}
     """
     model = UserProfile
     serializer_class = UserProfileWriteSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
+        IsUserOfProfileBeingCreated,
     ]
 
-#require_http_methods(['GET', 'POST'])
-class UserList(generics.ListCreateAPIView): # DONE
+#['GET']
+class UserList(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/users/
     GET request fetches all the users in the db
-    POST request body {"username":<>, "password":<>, "email":<>, "first_name":<>, "last_name":<>}
-    adds user to the db
-
-    Required Keys for POST: username, password, email, first_name, last_name
-
-    On used username: {"username":["A user with that username already exists."]}
-    On missing any fields: 500 Internal Server Error
+    
+    Authentication: Restricted to admin users only
     """
     model = User
     queryset = User.objects.all()
@@ -577,16 +579,12 @@ class UserList(generics.ListCreateAPIView): # DONE
     ]
 
 #['GET']
-class PostList(generics.ListAPIView): ##
+class PostList(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/posts/
     GET request fetches all the posts of the all the users in the db
 
-    Authentication: Restricted to admin users only 
-
-    #On invalid userpid: {"user":["Invalid pk \"4\" - object does not exist."]}
-    #On missing movie_id field: {"movie_id":["This field is required."]}
-    #On missing owner field: {"owner":["This field is required."]}
+    Authentication: Restricted to admin users only
     """
     model = Post
     queryset = Post.objects.all()
@@ -597,15 +595,12 @@ class PostList(generics.ListAPIView): ##
     ]
 
 #['GET']
-class ProfileList(generics.ListAPIView): ##
+class ProfileList(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/
     GET request fetches the userprofiles of the all the users in the db
 
     Authentication: Restricted to admin users only 
-    
-    #If user id already has a profile: {"user":["This field must be unique."]}
-    #On invalid user: {"user":["Invalid pk \"4\" - object does not exist."]}
     """
     model = UserProfile
     queryset = UserProfile.objects.all()
