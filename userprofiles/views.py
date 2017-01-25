@@ -459,11 +459,11 @@ class SearchProfiles(generics.ListAPIView): # DONE
                 ret.add(every.profile)
         return ret
 
-#require_http_methods(['GET'])
-class ProfileByUsername(generics.ListAPIView): # DONE
+#['GET']
+class SearchProfileByUsername(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/profiles/search/username=<username>/
-    GET request fetches the user (userprofile model) with the given username
+    GET: returns userprofile object with the given username, serialized
 
     Required Keys for GET: <username>
 
@@ -486,10 +486,11 @@ class ProfileByUsername(generics.ListAPIView): # DONE
             print ("Couldn't find a match")
         return ret
 
-class SearchUser(generics.RetrieveAPIView):
+#['GET']
+class SelfDetails(generics.RetrieveAPIView):
     """
-    https://themoviebook.herokuapp.com/users/search/
-    GET: returns serialized authenticated user object
+    https://themoviebook.herokuapp.com/users/fetchdetails/
+    GET: returns authenticated user object, serialized
     """
     model = User
     serializer_class = RegistrationSerializer

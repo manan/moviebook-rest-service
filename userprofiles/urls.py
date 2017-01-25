@@ -14,12 +14,12 @@ urlpatterns = [
     url('^posts/add/$', views.AddPost.as_view()),
 
     # GET USER DETAILS
-    url(r'^users/fetchdetails/$', views.SearchUser.as_view()),
+    url(r'^users/fetchdetails/$', views.SelfDetails.as_view()),
 
     # SEARCH USERPROFILES
     url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view()),
     url(r'^profiles/search/userpids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view()),
-    url(r'^profiles/search/username=(?P<username>\w+)/$', views.ProfileByUsername.as_view()),
+    url(r'^profiles/search/username=(?P<username>\w+)/$', views.SearchProfileByUsername.as_view()),
 
     # SEARCH POSTS
     url(r'^posts/search/username=(?P<username>.+)/$', views.PostsByUsername.as_view()),
