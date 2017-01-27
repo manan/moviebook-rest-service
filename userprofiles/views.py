@@ -30,23 +30,6 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from datetime import datetime
 from datetime import timedelta
-        
-
-#### DONE
-## Sign up
-## Building profile
-## Modify bio, birth-date, first_name, last_name, username, email
-## Follow someone (works with GET, check with PATCH)
-## Searching for a user
-## Getting all the posts of a user for displaying his profile
-## Uploading a post
-## Modifying a post
-## Deleting a post
-## Getting posts for a newsfeed
-## Changing password
-## Blocking a user
-## Change follower/following implementation
-## DEBUGGING
 
 # Create your views here.
 
@@ -77,12 +60,9 @@ class ProfilePicture(APIView):
 class NewsFeed(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/newsfeed/
-    GET request: returns the newsfeed for given user
+    GET request: returns the newsfeed for active user
 
-    Required Keys for GET: userid
-
-    On invalid userid: []
-    On invalid method: 405 Method not allowed
+    Required Keys for GET: none
     """
     model = Post
     serializer_class = PostSerializer
@@ -92,20 +72,16 @@ class NewsFeed(generics.ListAPIView):
     ]
 
     def get_queryset(self):
-        try:
-            userp = request.user.profile
-            people = userp.followings.all()
-            acc = []
-            for person in people:
-                for post in person.post.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
-                    acc.append(post)
-            acc.sort(key=lambda x: x.upload_date, reverse=True)
-            return acc
-        except Exception:
-            return set()
+        people_following = self.request.user.profile.followings.all()
+        newsfeed = []
+        for person in people_following:
+            for post in person.post.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
+                newsfeed.append(post)
+        newsfeed.sort(key=lambda x: x.upload_date, reverse=True)
+        return newsfeed
 
 #require_http_methods(['DELETE'])
-class DeletePost(generics.DestroyAPIView): # PERMISSION ONLY IF OWNER
+class DeletePost(generics.DestroyAPIView):
     """
     https://themoviebook.herokuapp.com/posts/delete/postpk=<pk>/
     DELETE request: deletes post with the given pk
@@ -113,8 +89,7 @@ class DeletePost(generics.DestroyAPIView): # PERMISSION ONLY IF OWNER
     Required Keys for DELETE: none
 
     On invalid pk: {"detail":"Not found."}
-    On invalid method: 405 Method not allowed
-    On illegal user (not owner): { "detail": "You do not have permission to perform this action." }
+    On invalid user (not owner): { "detail": "You do not have permission to perform this action." }
     """
     model = Post
     serializer_class = PostSerializer
@@ -137,7 +112,6 @@ class UpdateUser(generics.UpdateAPIView):
     """
     model = User
     serializer_class = RegistrationSerializer
-    queryset = User.objects.all()
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated
