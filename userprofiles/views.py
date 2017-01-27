@@ -126,16 +126,14 @@ class DeletePost(generics.DestroyAPIView): # PERMISSION ONLY IF OWNER
         IsOwnerOrReadOnly,
     ]
 
-#require_http_methods(['PUT', 'PATCH'])
-class UpdateUser(generics.UpdateAPIView): # DONE
+#['PUT', 'PATCH']
+class UpdateUser(generics.UpdateAPIView):
     """
-    https://themoviebook.herokuapp.com/users/update/username=<username>/
-    PATCH request: looks up user by username and modifies it according to body
+    https://themoviebook.herokuapp.com/users/update/
+    PATCH request: modifies active user
+    DO NOT USE PUT
 
     Required Keys for PATCH: none except the ones you want to change
-
-    On invalid username: TODO
-    On invalid method: 405 Method not allowed
     """
     model = User
     serializer_class = RegistrationSerializer
@@ -155,18 +153,16 @@ class UpdateUser(generics.UpdateAPIView): # DONE
     def get_object(self):
         return self.request.user
     
-#require_http_methods(['PUT', 'PATCH'])
-class UpdatePost(generics.UpdateAPIView): # PERMISSION ONLY IF OWNER
+#['PUT', 'PATCH']
+class UpdatePost(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/posts/update/postpk=<pk>/
-    PUT request: Updated the post with the given pk
+    PATCH request: Updates post with given pk
+    DO NOT USE PUT
 
     Required Keys for PATCH: only the ones you want to change
-    Required Keys for PUT: owner and movie_id
 
-    On invalid pk: TODO
-    On invalid method: 405 Method not allowed
-    On illegal user (not owner): { "detail": "You do not have permission to perform this action." }
+    On invalid user (not owner): { "detail": "You do not have permission to perform this action." }
     """
     model = Post
     serializer_class = PostSerializer
@@ -179,21 +175,17 @@ class UpdatePost(generics.UpdateAPIView): # PERMISSION ONLY IF OWNER
     def get_queryset(self):
         return self.request.user.profile.post.all()
 
-#require_http_methods(['PUT', 'PATCH'])
-class UpdateProfile(generics.UpdateAPIView): # DONE
+#['PUT', 'PATCH']
+class UpdateProfile(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/update/
-    PATCH request: looks up profile by token and modifies it according to body
+    PATCH request: modifies active user
+    DO NOT USE PUT
 
     Required Keys for PATCH: none except the ones you want to change
-    Required Keys for PUT: user
-
-    On invalid pk: TODO
-    On invalid method: 405 Method not allowed
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
-    queryset = UserProfile.objects.all()
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated
@@ -306,10 +298,10 @@ def BlockGET(request, username):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
-class PostsByUserPId(generics.ListAPIView): # DONE
+#['GET']
+class PostsByUserPId(generics.ListAPIView):
     """
-    https://themoviebook.herokuapp.com/posts/search/userid=<id>/
+    https://themoviebook.herokuapp.com/posts/search/userpid=<id>/
     GET request fetches all the posts of a certain user
 
     Required Keys for GET: <user id>
@@ -325,21 +317,17 @@ class PostsByUserPId(generics.ListAPIView): # DONE
     ]
 
     def get_queryset(self):
-        try:
-            queryuser = UserProfile.objects.get(pk=self.kwargs['userpid'])
-            mainuser = self.request.user.profile
-            if mainuser.isBlocked(queryuser) or mainuser.isBlockedBy(queryuser):
-                return set()
-            else:
-                return queryuser.post.all()
-        except Exception:
-            return set()
+        queryuser = UserProfile.objects.get(pk=self.kwargs['userpid'])
+        if self.request.user.profile.isBlockedBy(queryuser.user.username):
+            raise Exception("The user you're trying to find has blocked you. Savage. Lmao.");
+        return queryuser.post.all()
 
-#require_http_methods(['GET'])
-class PostsByUsername(generics.ListAPIView): # DONE
+#['GET']
+class PostsByUsername(generics.ListAPIView):
     """
-    https://themoviebook.herokuapp.com/posts/search/username=<id>/
-    GET request fetches all the posts of a certain user
+    https://themoviebook.herokuapp.com/posts/search/username=<username>/
+    GET request fetches all the posts of the given user
+    Raises Exception if active user is blocked by the queried user.
 
     Required Keys for GET: <username>
 
@@ -354,18 +342,13 @@ class PostsByUsername(generics.ListAPIView): # DONE
     ]
 
     def get_queryset(self):
-        try:
-            queryuser = User.objects.get(username=self.kwargs['username']).profile
-            mainuser = self.request.user.profile
-            if mainuser.isBlocked(queryuser) or mainuser.isBlockedBy(queryuser):
-                return set()
-            else:
-                return queryuser.post.all()
-        except Exception:
-            return set()
+        if request.user.profile.isBlockedBy(username=self.kwargs['username']):
+            raise Exception("The user you're trying to find has blocked you. Savage. Lmao.");
+        queryuser = User.objects.get(username=self.kwargs['username']).profile
+        return queryuser.post.all()
 
-#require_http_methods(['GET'])
-class PostsByIDs(generics.ListAPIView): # DONE
+#['GET']
+class PostsByIDs(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/posts/search/postids=<id1>,<id2>...<idn>/
     GET request fetches all the posts with the given post ids
@@ -393,11 +376,12 @@ class PostsByIDs(generics.ListAPIView): # DONE
                 pass
         return ret
 
-#require_http_methods(['GET'])
-class ProfilesByIDs(generics.ListAPIView): # DONE
+#['GET']
+class ProfilesByIDs(generics.ListAPIView):
     """
-    https://themoviebook.herokuapp.com/profiles/search/search/userids=<id1>,<id2>,..<idn>/
-    GET request fetches the users with the given user ids
+    https://themoviebook.herokuapp.com/profiles/search/userpids=<id1>,<id2>,..<idn>/
+    GET request fetches the users with the given user ids. Set doesn't include
+    profiles that have blocked active user.
 
     Required Keys for GET: at least one id
 
@@ -417,16 +401,19 @@ class ProfilesByIDs(generics.ListAPIView): # DONE
         ret = set()
         for everyid in ids:
             try:
-                ret.add(UserProfile.objects.get(pk=everyid))
+                userprofile = UserProfile.objects.get(pk=everyid)
+                if not self.request.user.profile.isBlockedBy(userprofile.user.username):
+                    ret.add(UserProfile.objects.get(pk=everyid))
             except (UserProfile.DoesNotExist):
                 pass
         return ret
 
-#require_http_methods(['GET'])
+#['GET']
 class SearchProfiles(generics.ListAPIView): # DONE
     """
     https://themoviebook.herokuapp.com/profiles/search/name=<name>/
-    GET request fetches all the users with an approximate match
+    GET request fetches all the userprofiles with an approximate 
+    name match. Set doesn't include profiles that have blocked active user.
 
     Required Keys for GET: <name>
 
@@ -446,7 +433,8 @@ class SearchProfiles(generics.ListAPIView): # DONE
             for every in User.objects.filter(Q(first_name__icontains = name)
                                              | Q(last_name__icontains = name)
                                              | Q(username__icontains = name)):
-                ret.add(every.profile)
+                if not self.request.user.profile.isBlockedBy(every.username):
+                    ret.add(every.profile)
         elif (len(name.split(' ')) >= 2):
             fname = name.split(' ')[0]
             lname = name.split(' ')[1]
@@ -456,15 +444,16 @@ class SearchProfiles(generics.ListAPIView): # DONE
                                              Q(last_name__contains = fname) |
                                              Q(username__contains = fname) |
                                              Q(username__contains = lname)):
-                ret.add(every.profile)
+                if not self.request.user.profile.isBlockedBy(every.username):
+                    ret.add(every.profile)
         return ret
 
 #['GET']
-class SearchProfileByUsername(generics.ListAPIView): # DONE
+class SearchProfileByUsername(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/search/username=<username>/
     GET: returns userprofile object with the given username, serialized
-
+    Exception raised when user is blocked by the user he is searching for.
     Required Keys for GET: <username>
 
     On no match: []
@@ -476,15 +465,10 @@ class SearchProfileByUsername(generics.ListAPIView): # DONE
         permissions.IsAuthenticatedOrReadOnly,
     ]
 
-    def get_queryset(self):
-        uname = self.kwargs['username']
-        ret = set()
-        try:
-            user = User.objects.get(username=uname)
-            ret.add(user.profile)
-        except (User.DoesNotExist):
-            print ("Couldn't find a match")
-        return ret
+    def get_object(self):
+        if (self.request.user.profile.isBlockedBy(self.kwargs['username'])):
+            raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
+        result = User.objects.get(username=self.kwargs['username']).profile
 
 #['GET']
 class SelfDetails(generics.RetrieveAPIView):
@@ -521,7 +505,7 @@ class AddUser(generics.CreateAPIView):
     ]
 
 #['POST']
-class AddPost(generics.CreateAPIView): # NOT TESTED
+class AddPost(generics.CreateAPIView):
     """
     https://themoviebook.herokuapp.com/posts/add/
     POST request body: {"owner":<userpid>, "movie_title":<bio>, "movie_id":"<imdbid>", "caption":"<cap>"}
