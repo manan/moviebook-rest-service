@@ -32,6 +32,11 @@ urlpatterns = [
     url(r'^profiles/block/username=(?P<username>\w+)/$', views.BlockGET),
     url(r'^profiles/unblock/username=(?P<username>\w+)/$', views.UnblockGET),
 
+    url(r'^profiles/follow/userpid=(?P<userpid>\w+)/$', views.FollowUserPIdGET),
+    url(r'^profiles/unfollow/userpid=(?P<userpid>\w+)/$', views.UnfollowUserPIdGET),
+    url(r'^profiles/block/userpid=(?P<userpid>\w+)/$', views.BlockUserPIdGET),
+    url(r'^profiles/unblock/userpid=(?P<userpid>\w+)/$', views.UnblockUserPIdGET),
+
     # UPDATE USERS/PROFILES/POSTS
     url(r'^profiles/update/$', views.UpdateProfile.as_view()),
     url(r'^posts/update/postpk=(?P<pk>.+)/$', views.UpdatePost.as_view()),

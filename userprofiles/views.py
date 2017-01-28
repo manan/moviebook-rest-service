@@ -173,6 +173,107 @@ class UpdateProfile(generics.UpdateAPIView):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
+def UnfollowUserPIdGET(request, userpid):
+    """
+    GET request: result: authenticated user unfollows user w userpid
+
+    Required Keys for GET: userpid
+
+    On invalid userpid: 412 Precondition Failed
+    If not formatted properly: 412 Precondition Failed
+    If username2 doesn't follow username1: 412 Precondition Failed
+    """
+    try:
+        userp = request.user.profile
+        bool = userp.unfollow(UserProfile.objects.get(pk=userpid).user.username)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+
+#require_http_methods(['GET'])
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,)) 
+def FollowUserPIdGET(request, userpid):
+    """
+    GET request: result: authenticated user follows user w userpid
+
+    Required Keys for GET: userpid
+
+    On invalid userpid: 412 Precondition Failed
+    If not formatted properly: 412 Precondition Failed
+    If username2 doesn't follow username1: 412 Precondition Failed
+    """
+    try:
+        userp = request.user.profile
+        bool = userp.follow(UserProfile.objects.get(pk=userpid).user.username)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+
+#require_http_methods(['GET'])
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
+def UnblockUserPIdGET(request, userpid):
+    """
+    GET request: result: authenticated user unblocks user w userpid
+
+    Required Keys for GET: userpid
+
+    On invalid username: 412 Precondition Failed
+    On invalid method: 405 Method not allowed 
+    If not formatted properly: 412 Precondition Failed
+    If username2 doesn't follow username1: 412 Precondition Failed
+    """
+    try:
+        userp = request.user.profile
+        bool = userp.unblock(UserProfile.objects.get(pk=userpid).user.username)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+
+#require_http_methods(['GET'])
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
+def BlockUserPIdGET(request, userpid):
+    """
+    GET request: result: authenticated user blocks user w given userpid
+
+    Required Keys for GET: userpid
+
+    On invalid userpid: 412 Precondition Failed
+    If not formatted properly: 412 Precondition Failed
+    If username2 doesn't follow username1: 412 Precondition Failed
+    """
+    try:
+        userp = request.user.profile
+        bool = userp.block(UserProfile.objects.get(pk=userpid).user.username)
+        if bool:
+            return HttpResponse('Done!', status=status.HTTP_200_OK)
+        else:
+            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+    except Exception:
+        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+
+#require_http_methods(['GET'])
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
 def UnfollowGET(request, username):
     """
     GET request: result: authenticated user unfollows user w username
