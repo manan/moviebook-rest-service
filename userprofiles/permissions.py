@@ -18,7 +18,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return owner_id == userp.id
         return False
 
-class IsUserOfProfileBeingCreated(permissions.BasePermission):
+class IsUserOfProfile(permissions.BasePermission):
     
     
     def has_object_permission(self, request, view, obj):

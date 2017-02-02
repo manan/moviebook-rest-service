@@ -19,10 +19,15 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
                   'profile_picture', 'followings', 'followers', 'following_count',
                   'follower_count', 'blocked', 'blockedby', 'id')
 
-class UserProfileWriteSerializer(serializers.ModelSerializer):
+class UserProfileCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('user', 'bio', 'birth_date')
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('user', 'bio', 'birth_date', 'profile_picture', 'followings', 'blocked')
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:

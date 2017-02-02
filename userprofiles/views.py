@@ -6,10 +6,11 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import UserProfile, Post
-from .serializers import UserProfileReadSerializer, UserProfileWriteSerializer
+from .serializers import UserProfileReadSerializer, UserProfileCreateSerializer
+from .serializers import UserProfileUpdateSerializer
 from .serializers import RegistrationSerializer, PostSerializer
 from .permissions import IsOwnerOrReadOnly
-from .permissions import IsUserOfProfileBeingCreated
+from .permissions import IsUserOfProfile
 from django.contrib.auth.models import User
 
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -114,7 +115,7 @@ class UpdateUser(generics.UpdateAPIView):
     serializer_class = RegistrationSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.IsAuthenticated
+        permissions.IsAuthenticated,
     ]
 
     def perform_update(self, serializer):                                                           
@@ -159,10 +160,11 @@ class UpdateProfile(generics.UpdateAPIView):
     Required Keys for PATCH: none except the ones you want to change
     """
     model = UserProfile
-    serializer_class = UserProfileReadSerializer
+    serializer_class = UserProfileUpdateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.IsAuthenticated
+        permissions.IsAuthenticated,
+        IsUserOfProfile,
     ]
 
     def get_object(self):
@@ -172,7 +174,7 @@ class UpdateProfile(generics.UpdateAPIView):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def UnfollowUserPIdGET(request, userpid):
     """
     GET request: result: authenticated user unfollows user w userpid
@@ -197,7 +199,7 @@ def UnfollowUserPIdGET(request, userpid):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,)) 
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def FollowUserPIdGET(request, userpid):
     """
     GET request: result: authenticated user follows user w userpid
@@ -222,7 +224,7 @@ def FollowUserPIdGET(request, userpid):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def UnblockUserPIdGET(request, userpid):
     """
     GET request: result: authenticated user unblocks user w userpid
@@ -248,7 +250,7 @@ def UnblockUserPIdGET(request, userpid):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def BlockUserPIdGET(request, userpid):
     """
     GET request: result: authenticated user blocks user w given userpid
@@ -273,7 +275,7 @@ def BlockUserPIdGET(request, userpid):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def UnfollowGET(request, username):
     """
     GET request: result: authenticated user unfollows user w username
@@ -299,7 +301,7 @@ def UnfollowGET(request, username):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,)) 
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def FollowGET(request, username):
     """
     GET request: result: authenticated user follows user w username
@@ -325,7 +327,7 @@ def FollowGET(request, username):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def UnblockGET(request, username):
     """
     GET request: result: authenticated user unblocks user w username
@@ -351,7 +353,7 @@ def UnblockGET(request, username):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def BlockGET(request, username):
     """
     GET request: result: authenticated user blocks user w given username
@@ -417,7 +419,7 @@ class PostsByUsername(generics.ListAPIView):
     ]
 
     def get_queryset(self):
-        if request.user.profile.isBlockedBy(username=self.kwargs['username']):
+        if self.request.user.profile.isBlockedBy(username=self.kwargs['username']):
             raise Exception("The user you're trying to find has blocked you. Savage. Lmao.");
         queryuser = User.objects.get(username=self.kwargs['username']).profile
         return queryuser.post.all()
@@ -615,11 +617,11 @@ class AddProfile(generics.CreateAPIView):
     On denied permission: {...}
     """
     model = UserProfile
-    serializer_class = UserProfileWriteSerializer
+    serializer_class = UserProfileCreateSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
-        IsUserOfProfileBeingCreated,
+        IsUserOfProfile,
     ]
 
 #['GET']
@@ -670,6 +672,4 @@ class ProfileList(generics.ListAPIView):
     ]
     
     def get_serializer_class(self):
-        if (self.request.method == 'POST'):
-            return UserProfileWriteSerializer
         return UserProfileReadSerializer
