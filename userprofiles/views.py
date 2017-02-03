@@ -133,7 +133,6 @@ class UpdatePost(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/posts/update/postpk=<pk>/
     PATCH request: Updates post with given pk
-    DO NOT USE PUT
 
     Required Keys for PATCH: only the ones you want to change
 
@@ -155,7 +154,6 @@ class UpdateProfile(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/update/
     PATCH request: modifies active user
-    DO NOT USE PUT
 
     Required Keys for PATCH: none except the ones you want to change
     """
@@ -169,6 +167,14 @@ class UpdateProfile(generics.UpdateAPIView):
 
     def get_object(self):
         return self.request.user.profile
+
+    def perform_update(self, serializer):
+        if 'followings' in self.request.data:
+            userp = request.user.profile
+            for following in self.request.data['followings']:
+                bool = userp.follow(UserProfile.objects.get(pk=userpid).user.username)
+        else:
+            print("Here2")
 
 #require_http_methods(['GET'])
 @csrf_exempt

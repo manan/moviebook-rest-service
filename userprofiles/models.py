@@ -39,67 +39,129 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-    def isFollowing(self, username):
-        return self.followings.filter(user__username=username).exists()
+    def isFollowing(self, username=False, upid=False):
+        if username:
+            return self.followings.filter(user__username=username).exists()
+        elif upid:
+            return self.followings.filter(pk=upid).exists()
+        else:
+            return False
 
-    def isFollowedBy(self, username):
-        return self.followers.filter(user__username=username).exists()
+    def isFollowedBy(self, username=False, upid=False):
+        if username:
+            return self.followers.filter(user__username=username).exists()
+        elif upid:
+            return self.followers.filter(pk=upid).exists()
+        else:
+            return False
 
-    def isBlocked(self, username):
-        return self.blocked.filter(user__username=username).exists()
+    def isBlocked(self, username=False, upid=False):
+        if username:
+            return self.blocked.filter(user__username=username).exists()
+        elif upid:
+            return self.blocked.filter(pk=upid).exists()
+        else:
+            return False
 
-    def isBlockedBy(self, username):
-        return self.blockedby.filter(user__username=username).exists()
+    def isBlockedBy(self, username=False, upid=False):
+        if username:
+            return self.blockedby.filter(user__username=username).exists()
+        elif upid:
+            return self.blockedby.filter(pk=upid).exists()
+        else:
+            return False
     
-    def block(self, username):
-        if self.isBlocked(username):
+    def block(self, username=False, upid=False):
+        if username:
+            if self.isBlocked(username=username):
+                return False
+            else:
+                other = User.objects.get(username=username).profile
+                self.blocked.add(other)
+                self.unfollow(username)
+                other.unfollow(self.user.username)
+                self.save()
+                other.save()
+                return True
+        elif upid:
+            if self.isBlocked(upid=upid):
+                return False
+            else:
+                other = UserProfile.objects.get(pk=upid)
+                self.blocked.add(other)
+                self.unfollow(upid=upid)
+                other.unfollow(self.user.username)
+                self.save()
+                other.save()
+                return True
+        else:
             return False
-        else:
-            other = User.objects.get(username=username).profile
-            self.blocked.add(other)
-            self.unfollow(username)
-            other.unfollow(self.user.username)
-            self.save()
-            other.save()
-            return True
 
-    def unblock(self, username):
-        if self.isBlocked(username):
-            other = self.blocked.get(user__username=username)
-            self.blocked.remove(other)
-            self.save()
-            other.save()
-            return True
+    def unblock(self, username=False, upid=False):
+        if username:
+            if self.isBlocked(username=username):
+                other = self.blocked.get(user__username=username)
+                self.blocked.remove(other)
+                self.save()
+                other.save()
+                return True
+            else:
+                return False
+        elif upid:
+            if self.isBlocked(upid=upid):
+                other = self.blocked.get(pk=upid)
+                self.blocked.remove(other)
+                self.save()
+                other.save()
+                return True
+            else:
+                return False;
         else:
             return False
 
-    def follow(self, username):
-        if self.isFollowing(username) or self.isBlocked(username):
+    def follow(self, username=False, upid=False):
+        if username:
+            if self.isFollowing(username) or self.isBlocked(username) or self.isBlockedBy(username):
+                return False
+            else:
+                other = UserProfile.objects.get(user__username=username)
+        elif upid:
+            if self.isFollowing(upid=upid) or self.isBlocked(upid=upid) or self.isBlockedBy(upid=upid):
+                return False
+            else:
+                other = UserProfile.objects.get(pk=upid)
+        else:
             return False
-        else:
-            other = User.objects.get(username=username).profile
-            self.followings.add(other)
-            self.following_count = self.followings.all().count()
-            self.follower_count = self.followers.all().count()
-            other.following_count = other.followings.all().count()
-            other.follower_count = other.followers.all().count()
-            other.save()
-            self.save()
-            return True
+        self.followings.add(other)
+        self.following_count = self.followings.all().count()
+        self.follower_count = self.followers.all().count()
+        other.following_count = other.followings.all().count()
+        other.follower_count = other.followers.all().count()
+        other.save()
+        self.save()
+        return True
 
-    def unfollow(self, username):
-        if self.isFollowing(username):
-            other = self.followings.get(user__username=username)
-            self.followings.remove(other)
-            self.following_count = self.followings.all().count()
-            self.follower_count = self.followers.all().count()
-            other.following_count = other.followings.all().count()
-            other.follower_count = other.followers.all().count()
-            other.save()
-            self.save()
-            return True
+    def unfollow(self, username=False, upid=False):
+        if username:
+            if self.isFollowing(username):
+                other = self.followings.get(user__username=username)
+            else:
+                return False
+        elif upid:
+            if self.isFollowing(upid=upid):
+                other = self.followings.get(pk=upid)
+            else:
+                return False
         else:
-           return False
+            return False
+        self.followings.remove(other)
+        self.following_count = self.followings.all().count()
+        self.follower_count = self.followers.all().count()
+        other.following_count = other.followings.all().count()
+        other.follower_count = other.followers.all().count()
+        other.save()
+        self.save()
+        return True
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
