@@ -106,8 +106,7 @@ class DeletePost(generics.DestroyAPIView):
 class UpdateUser(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/users/update/
-    PATCH request: modifies active user
-    DO NOT USE PUT
+    PATCH/PUT request: modifies active user
 
     Required Keys for PATCH: none except the ones you want to change
     """
@@ -132,7 +131,7 @@ class UpdateUser(generics.UpdateAPIView):
 class UpdatePost(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/posts/update/postpk=<pk>/
-    PATCH request: Updates post with given pk
+    PATCH/PUT request: Updates post with given pk
 
     Required Keys for PATCH: only the ones you want to change
 
@@ -153,8 +152,8 @@ class UpdatePost(generics.UpdateAPIView):
 class UpdateProfile(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/update/
-    PATCH request: modifies active user
-
+    PATCH/PUT request: modifies active user
+    
     Required Keys for PATCH: none except the ones you want to change
     """
     model = UserProfile
@@ -172,9 +171,11 @@ class UpdateProfile(generics.UpdateAPIView):
         if 'followings' in self.request.data:
             userp = request.user.profile
             for following in self.request.data['followings']:
-                bool = userp.follow(UserProfile.objects.get(pk=userpid).user.username)
+                if not userp.isFollowing(upid=following):
+                    userp.follow(upid=following)
+            serializer.save()
         else:
-            print("Here2")
+            serializer.save()
 
 #require_http_methods(['GET'])
 @csrf_exempt
@@ -193,7 +194,7 @@ def UnfollowUserPIdGET(request, userpid):
     """
     try:
         userp = request.user.profile
-        bool = userp.unfollow(UserProfile.objects.get(pk=userpid).user.username)
+        bool = userp.unfollow(upid=userpid)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -218,7 +219,7 @@ def FollowUserPIdGET(request, userpid):
     """
     try:
         userp = request.user.profile
-        bool = userp.follow(UserProfile.objects.get(pk=userpid).user.username)
+        bool = userp.follow(upid=userpid)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -244,7 +245,7 @@ def UnblockUserPIdGET(request, userpid):
     """
     try:
         userp = request.user.profile
-        bool = userp.unblock(UserProfile.objects.get(pk=userpid).user.username)
+        bool = userp.unblock(upid=userpid)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -269,7 +270,7 @@ def BlockUserPIdGET(request, userpid):
     """
     try:
         userp = request.user.profile
-        bool = userp.block(UserProfile.objects.get(pk=userpid).user.username)
+        bool = userp.block(upid=userpid)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
