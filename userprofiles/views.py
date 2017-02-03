@@ -57,7 +57,7 @@ class ProfilePicture(APIView):
         userprofile.save()
         return Response(status=204)
 
-#require_http_methods(['GET'])
+#['GET']
 class NewsFeed(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/newsfeed/
@@ -81,7 +81,7 @@ class NewsFeed(generics.ListAPIView):
         newsfeed.sort(key=lambda x: x.upload_date, reverse=True)
         return newsfeed
 
-#require_http_methods(['DELETE'])
+#['DELETE']
 class DeletePost(generics.DestroyAPIView):
     """
     https://themoviebook.herokuapp.com/posts/delete/postpk=<pk>/
@@ -180,7 +180,7 @@ class UpdateProfile(generics.UpdateAPIView):
                 userp.removeFollower(upid=b)
         serializer.save(followings=newFollowingSet)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -205,7 +205,7 @@ def UnfollowUserPIdGET(request, userpid):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -230,7 +230,7 @@ def FollowUserPIdGET(request, userpid):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -256,7 +256,7 @@ def UnblockUserPIdGET(request, userpid):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -281,7 +281,7 @@ def BlockUserPIdGET(request, userpid):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -307,7 +307,7 @@ def UnfollowGET(request, username):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -333,7 +333,7 @@ def FollowGET(request, username):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -359,7 +359,7 @@ def UnblockGET(request, username):
     except Exception:
         return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#require_http_methods(['GET'])
+#['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
