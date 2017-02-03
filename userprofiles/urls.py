@@ -14,7 +14,8 @@ urlpatterns = [
     url('^posts/add/$', views.AddPost.as_view()),
 
     # GET USER DETAILS
-    url(r'^users/fetchdetails/$', views.SelfDetails.as_view()),
+    url(r'^users/fetchdetails/$', views.SelfUserDetails.as_view()),
+    url(r'^profiles/fetchdetails/$', views.SelfProfileDetails.as_view()),
 
     # SEARCH USERPROFILES
     url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view()),

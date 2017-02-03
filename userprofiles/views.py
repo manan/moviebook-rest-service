@@ -7,7 +7,7 @@ from rest_framework import status
 
 from .models import UserProfile, Post
 from .serializers import UserProfileReadSerializer, UserProfileCreateSerializer
-from .serializers import UserProfileUpdateSerializer
+from .serializers import UserProfileUpdateSerializer, UserProfileSelfReadSerializer
 from .serializers import RegistrationSerializer, PostSerializer
 from .permissions import IsOwnerOrReadOnly
 from .permissions import IsUserOfProfile
@@ -296,7 +296,7 @@ def UnfollowGET(request, username):
     """
     try:
         userp = request.user.profile
-        bool = userp.unfollow(username)
+        bool = userp.unfollow(username=username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -322,7 +322,7 @@ def FollowGET(request, username):
     """
     try:
         userp = request.user.profile
-        bool = userp.follow(username)
+        bool = userp.follow(username=username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -348,7 +348,7 @@ def UnblockGET(request, username):
     """
     try:
         userp = request.user.profile
-        bool = userp.unblock(username)
+        bool = userp.unblock(username=username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -374,7 +374,7 @@ def BlockGET(request, username):
     """
     try:
         userp = request.user.profile
-        bool = userp.block(username)
+        bool = userp.block(username=username)
         if bool:
             return HttpResponse('Done!', status=status.HTTP_200_OK)
         else:
@@ -402,7 +402,7 @@ class PostsByUserPId(generics.ListAPIView):
 
     def get_queryset(self):
         queryuser = UserProfile.objects.get(pk=self.kwargs['userpid'])
-        if self.request.user.profile.isBlockedBy(queryuser.user.username):
+        if self.request.user.profile.isBlockedBy(username=queryuser.user.username):
             raise Exception("The user you're trying to find has blocked you. Savage. Lmao.");
         return queryuser.post.all()
 
@@ -517,7 +517,7 @@ class SearchProfiles(generics.ListAPIView): # DONE
             for every in User.objects.filter(Q(first_name__icontains = name)
                                              | Q(last_name__icontains = name)
                                              | Q(username__icontains = name)):
-                if not self.request.user.profile.isBlockedBy(every.username):
+                if not self.request.user.profile.isBlockedBy(username=every.username):
                     ret.add(every.profile)
         elif (len(name.split(' ')) >= 2):
             fname = name.split(' ')[0]
@@ -528,7 +528,7 @@ class SearchProfiles(generics.ListAPIView): # DONE
                                              Q(last_name__contains = fname) |
                                              Q(username__contains = fname) |
                                              Q(username__contains = lname)):
-                if not self.request.user.profile.isBlockedBy(every.username):
+                if not self.request.user.profile.isBlockedBy(username=every.username):
                     ret.add(every.profile)
         return ret
 
@@ -550,12 +550,12 @@ class SearchProfileByUsername(generics.RetrieveAPIView):
     ]
 
     def get_object(self):
-        if (self.request.user.profile.isBlockedBy(self.kwargs['username'])):
+        if (self.request.user.profile.isBlockedBy(username=self.kwargs['username'])):
             raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
         result = User.objects.get(username=self.kwargs['username']).profile
 
 #['GET']
-class SelfDetails(generics.RetrieveAPIView):
+class SelfUserDetails(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/users/fetchdetails/
     GET: returns authenticated user object, serialized
@@ -569,6 +569,22 @@ class SelfDetails(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+#['GET']
+class SelfProfileDetails(generics.RetrieveAPIView):
+    """
+    https://themoviebook.herokuapp.com/profiles/fetchdetails/
+    GET: returns authenticated UserProfile object, serialized
+    """
+    model = UserProfile
+    serializer_class = UserProfileSelfReadSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+        
+    def get_object(self):
+        return self.request.user.profile
 
 #['POST']
 class AddUser(generics.CreateAPIView):

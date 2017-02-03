@@ -17,6 +17,16 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ('user', 'username', 'first_name', 'last_name', 'bio', 'birth_date',
                   'profile_picture', 'followings', 'followers', 'following_count',
+                  'follower_count', 'id')
+
+class UserProfileSelfReadSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source='user.username')
+    first_name = serializers.ReadOnlyField(source='user.first_name')
+    last_name = serializers.ReadOnlyField(source='user.last_name')
+    class Meta:
+        model = UserProfile
+        fields = ('user', 'username', 'first_name', 'last_name', 'bio', 'birth_date',
+                  'profile_picture', 'followings', 'followers', 'following_count',
                   'follower_count', 'blocked', 'blockedby', 'id')
 
 class UserProfileCreateSerializer(serializers.ModelSerializer):
