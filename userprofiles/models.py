@@ -33,8 +33,7 @@ class UserProfile(models.Model):
                                         blank = True, null = True)
     blocked = models.ManyToManyField('self', related_name = 'blockedby', symmetrical=False,
                                      blank = True, null = True)
-    following_count = models.IntegerField(default=0, blank = True, null = True)
-    follower_count = models.IntegerField(default=0, blank = True, null = True)
+
 
     def __unicode__(self):
         return self.user.username
@@ -133,10 +132,6 @@ class UserProfile(models.Model):
         else:
             return False
         self.followings.add(other)
-        self.following_count = self.followings.all().count()
-        self.follower_count = self.followers.all().count()
-        other.following_count = other.followings.all().count()
-        other.follower_count = other.followers.all().count()
         other.save()
         self.save()
         return True
@@ -155,10 +150,25 @@ class UserProfile(models.Model):
         else:
             return False
         self.followings.remove(other)
-        self.following_count = self.followings.all().count()
-        self.follower_count = self.followers.all().count()
-        other.following_count = other.followings.all().count()
-        other.follower_count = other.followers.all().count()
+        other.save()
+        self.save()
+        return True
+
+    def removeFollower(self, username=False, upid=False):
+        print("Here! A")
+        if username:
+            if self.isFollowedBy(username=username):
+                other = self.followers.get(user__username=username)
+            else:
+                return False
+        elif upid:
+            if self.isFollowedBy(upid=upid):
+                other = self.followers.get(pk=upid)
+            else:
+                return False
+        else:
+            return False
+        other.followings.remove(self)
         other.save()
         self.save()
         return True

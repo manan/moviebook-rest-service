@@ -168,14 +168,17 @@ class UpdateProfile(generics.UpdateAPIView):
         return self.request.user.profile
 
     def perform_update(self, serializer):
+        newFollowingSet = self.request.user.profile.followings
+        userp = self.request.user.profile
         if 'followings' in self.request.data:
-            userp = request.user.profile
+            newFollowingSet = []
             for following in self.request.data['followings']:
-                if not userp.isFollowing(upid=following):
-                    userp.follow(upid=following)
-            serializer.save()
-        else:
-            serializer.save()
+                if not userp.isBlockedBy(upid=following):
+                    newFollowingSet.append(following)
+        if 'blocked' in self.request.data:
+            for b in self.request.data['blocked']:
+                userp.removeFollower(upid=b)
+        serializer.save(followings=newFollowingSet)
 
 #require_http_methods(['GET'])
 @csrf_exempt
@@ -695,4 +698,4 @@ class ProfileList(generics.ListAPIView):
     ]
     
     def get_serializer_class(self):
-        return UserProfileReadSerializer
+        return UserProfileSelfReadSerializer
