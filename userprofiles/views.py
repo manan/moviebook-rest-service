@@ -168,7 +168,7 @@ class UpdateProfile(generics.UpdateAPIView):
         return self.request.user.profile
 
     def perform_update(self, serializer):
-        newFollowingSet = self.request.user.profile.followings
+        newFollowingSet = self.request.user.profile.followings.all()
         userp = self.request.user.profile
         if 'followings' in self.request.data:
             newFollowingSet = []
