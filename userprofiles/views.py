@@ -555,7 +555,7 @@ class SearchProfileByUsername(generics.RetrieveAPIView):
     def get_object(self):
         if (self.request.user.profile.isBlockedBy(username=self.kwargs['username'])):
             raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
-        result = User.objects.get(username=self.kwargs['username']).profile
+        return User.objects.get(username=self.kwargs['username']).profile
 
 #['GET']
 class SelfUserDetails(generics.RetrieveAPIView):
