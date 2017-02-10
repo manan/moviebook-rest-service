@@ -28,6 +28,7 @@ class UserProfile(models.Model):
     GENDER_CHOICES = (
                       ('M', 'Male'),
                       ('F', 'Female'),
+                      ('U', 'Unspecified')
                       )
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name = 'profile')
     bio = models.TextField(blank = True, null = True)
