@@ -52,6 +52,6 @@ urlpatterns = [
 
     # PROFILE PICTURES
     url(r'^profilepicture/upload/$', views.ProfilePictureUpload.as_view()),
-    url(r'^profilepicture/username=(?P<username>\w+)/$', views.ProfilePictureDownload)
+    url(r'^profilepicture/(?P<username>\w+)/$', views.ProfilePictureDownload)
     
 ]

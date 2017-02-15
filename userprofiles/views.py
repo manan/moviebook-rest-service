@@ -34,8 +34,15 @@ from datetime import timedelta
 
 # Create your views here.
 
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated))
 def ProfilePictureDownload(request, username):
-    image = "Foo"
+    if request.user.profile.isBlockedBy(username):
+        failedResponse = '{"detail":"You do not have permission to perform this action."}'
+        return HttpResponse(failedResponse, status=status.HTTP_401_UNAUTHORIZED)
+    img =  "https://themoviebook.herokuapp.com/media/" + username + ".jpg"
+    return render(request, "profilepicture.html", {'image': img})
 
 class ProfilePictureUpload(APIView):
     """
