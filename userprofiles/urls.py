@@ -49,6 +49,9 @@ urlpatterns = [
     # SPECIAL PURPOSE
     url(r'^newsfeed/$', views.NewsFeed.as_view()),
     url(r'^token-auth/$', view.obtain_auth_token),
-    url(r'^profilepicture/upload/$', views.ProfilePicture.as_view()),
+
+    # PROFILE PICTURES
+    url(r'^profilepicture/upload/$', views.ProfilePictureUpload.as_view()),
+    url(r'^profilepicture/username=(?P<username>\w+)/$', views.ProfilePictureDownload)
     
 ]

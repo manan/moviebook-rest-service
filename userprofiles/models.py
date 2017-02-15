@@ -33,7 +33,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name = 'profile')
     bio = models.TextField(blank = True, null = True)
     birth_date = models.DateField(blank = True, null = True)
-    profile_picture = models.FileField(upload_to = upload_location, blank = True, null = True)
+    profile_picture = models.FileField(upload_to = upload_location_rm_dup, blank = True, null = True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank = True, null = True)
     followings = models.ManyToManyField('self', related_name = 'followers', symmetrical=False,
                                         blank = True, null = True)

@@ -35,7 +35,7 @@ from datetime import timedelta
 # Create your views here.
 
 def ProfilePictureDownload(request, username):
-    
+    image =
 
 class ProfilePictureUpload(APIView):
     """
