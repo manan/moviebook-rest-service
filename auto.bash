@@ -2,11 +2,8 @@ cd ~/Desktop/TheMovieBookAPI/themoviebookAPI/userprofiles/
 
 rm *.pyc
 rm *.py~
-rm -rf migrations
 
 cd ..
-
-rm db.sqlite3
 
 cd themoviebookAPI/
 
@@ -19,3 +16,6 @@ python manage.py makemigrations userprofiles
 
 python manage.py migrate
 
+python manage.py migrate —-run-syncdb
+
+python manage.py runserver

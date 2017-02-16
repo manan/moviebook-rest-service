@@ -32,17 +32,23 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from datetime import datetime
 from datetime import timedelta
 
+import os
 # Create your views here.
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated))
+@permission_classes((permissions.IsAuthenticated,))
 def ProfilePictureDownload(request, username):
     if request.user.profile.isBlockedBy(username):
         failedResponse = '{"detail":"You do not have permission to perform this action."}'
         return HttpResponse(failedResponse, status=status.HTTP_401_UNAUTHORIZED)
-    img =  "https://themoviebook.herokuapp.com/media/" + username + ".jpg"
-    return render(request, "profilepicture.html", {'image': img})
+    img =  os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media_cdn'), username + '.jpg')
+    try:
+        with open(img, "rb") as f:
+            return HttpResponse(f.read(), content_type="image/jpeg")
+    except IOError:
+        failedResponse = '{"detail": "No image found"}'
+        return HttpResponse(failedResponse, status=status.HTTP_401_UNAUTHORIZED)
 
 class ProfilePictureUpload(APIView):
     """
@@ -56,13 +62,12 @@ class ProfilePictureUpload(APIView):
     parser_classes = (FormParser, MultiPartParser)
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.IsAuthenticated
+        permissions.IsAuthenticated,
     ]
 
     def post(self, request, format=None):
         file_obj = request.FILES['file']
         userprofile = request.user.profile
-        userprofile.profile_picture.delete()
         userprofile.profile_picture = file_obj
         userprofile.save()
         return Response(status=204)

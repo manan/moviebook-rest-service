@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',
+    #'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'themoviebookAPI.urls'
@@ -131,8 +131,8 @@ ALLOWED_HOSTS = ['*']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+# LOCAL DATABASE
 try:
-    from .local_settings import *
-except ImportError:
-    pass
-
+	from .local_settings import *
+except Exception as e:
+	pass
