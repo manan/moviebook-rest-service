@@ -27,16 +27,11 @@ urlpatterns = [
     url(r'^posts/search/userpid=(?P<userpid>.+)/$', views.PostsByUserPId.as_view()),
     url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
 
-    # FOLLOW/UNFOLLOW/BLOCK/UNBLOCK USERS
-    url(r'^profiles/follow/username=(?P<username>\w+)/$', views.FollowGET),
-    url(r'^profiles/unfollow/username=(?P<username>\w+)/$', views.UnfollowGET),
-    url(r'^profiles/block/username=(?P<username>\w+)/$', views.BlockGET),
-    url(r'^profiles/unblock/username=(?P<username>\w+)/$', views.UnblockGET),
-
-    url(r'^profiles/follow/userpid=(?P<userpid>\w+)/$', views.FollowUserPIdGET),
-    url(r'^profiles/unfollow/userpid=(?P<userpid>\w+)/$', views.UnfollowUserPIdGET),
-    url(r'^profiles/block/userpid=(?P<userpid>\w+)/$', views.BlockUserPIdGET),
-    url(r'^profiles/unblock/userpid=(?P<userpid>\w+)/$', views.UnblockUserPIdGET),
+    # FOLLOW/UNFOLLOW/BLOCK/UNBLOCK USERS # Don't use for production server
+    url(r'^profiles/follow/userpid=(?P<userpid>\w+)/$', views.FollowUser),
+    url(r'^profiles/unfollow/userpid=(?P<userpid>\w+)/$', views.UnfollowUser),
+    url(r'^profiles/block/userpid=(?P<userpid>\w+)/$', views.BlockUser),
+    url(r'^profiles/unblock/userpid=(?P<userpid>\w+)/$', views.UnblockUser),
 
     # UPDATE USERS/PROFILES/POSTS
     url(r'^profiles/update/$', views.UpdateProfile.as_view()),

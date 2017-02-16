@@ -42,14 +42,16 @@ def ProfilePictureDownload(request, username):
     if request.user.profile.isBlockedBy(username):
         failedResponse = '{"detail":"You do not have permission to perform this action."}'
         return HttpResponse(failedResponse, status=status.HTTP_401_UNAUTHORIZED)
+    # Use settings.MEDIA_ROOT for production
     img =  os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media_cdn'), username + '.jpg')
     try:
         with open(img, "rb") as f:
             return HttpResponse(f.read(), content_type="image/jpeg")
     except IOError:
         failedResponse = '{"detail": "No image found"}'
-        return HttpResponse(failedResponse, status=status.HTTP_401_UNAUTHORIZED)
+        return HttpResponse(failedResponse)
 
+#['POST']
 class ProfilePictureUpload(APIView):
     """
     https://themoviebook.herokuapp.com/profilepicture/upload/
@@ -200,7 +202,7 @@ class UpdateProfile(generics.UpdateAPIView):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def UnfollowUserPIdGET(request, userpid):
+def UnfollowUser(request, userpid):
     """
     GET request: result: authenticated user unfollows user w userpid
 
@@ -214,18 +216,18 @@ def UnfollowUserPIdGET(request, userpid):
         userp = request.user.profile
         bool = userp.unfollow(upid=userpid)
         if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
+            return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
     except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
 
 #['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def FollowUserPIdGET(request, userpid):
+def FollowUser(request, userpid):
     """
     GET request: result: authenticated user follows user w userpid
 
@@ -239,18 +241,18 @@ def FollowUserPIdGET(request, userpid):
         userp = request.user.profile
         bool = userp.follow(upid=userpid)
         if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
+            return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
     except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
 
 #['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def UnblockUserPIdGET(request, userpid):
+def UnblockUser(request, userpid):
     """
     GET request: result: authenticated user unblocks user w userpid
 
@@ -265,18 +267,18 @@ def UnblockUserPIdGET(request, userpid):
         userp = request.user.profile
         bool = userp.unblock(upid=userpid)
         if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
+            return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
     except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
 
 #['GET']
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def BlockUserPIdGET(request, userpid):
+def BlockUser(request, userpid):
     """
     GET request: result: authenticated user blocks user w given userpid
 
@@ -290,115 +292,13 @@ def BlockUserPIdGET(request, userpid):
         userp = request.user.profile
         bool = userp.block(upid=userpid)
         if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
+            return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
     except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
+        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
 
-#['GET']
-@csrf_exempt
-@api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def UnfollowGET(request, username):
-    """
-    GET request: result: authenticated user unfollows user w username
 
-    Required Keys for GET: username
-
-    On invalid username: 412 Precondition Failed
-    On invalid method: 405 Method not allowed 
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
-    """
-    try:
-        userp = request.user.profile
-        bool = userp.unfollow(username=username)
-        if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
-        else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-
-#['GET']
-@csrf_exempt
-@api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def FollowGET(request, username):
-    """
-    GET request: result: authenticated user follows user w username
-
-    Required Keys for GET: username
-
-    On invalid username: 412 Precondition Failed
-    On invalid method: 405 Method not allowed 
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
-    """
-    try:
-        userp = request.user.profile
-        bool = userp.follow(username=username)
-        if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
-        else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-
-#['GET']
-@csrf_exempt
-@api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def UnblockGET(request, username):
-    """
-    GET request: result: authenticated user unblocks user w username
-
-    Required Keys for GET: username
-
-    On invalid username: 412 Precondition Failed
-    On invalid method: 405 Method not allowed 
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
-    """
-    try:
-        userp = request.user.profile
-        bool = userp.unblock(username=username)
-        if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
-        else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-
-#['GET']
-@csrf_exempt
-@api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def BlockGET(request, username):
-    """
-    GET request: result: authenticated user blocks user w given username
-
-    Required Keys for GET: username
-
-    On invalid username: 412 Precondition Failed
-    On invalid method: 405 Method not allowed 
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
-    """
-    try:
-        userp = request.user.profile
-        bool = userp.block(username=username)
-        if bool:
-            return HttpResponse('Done!', status=status.HTTP_200_OK)
-        else:
-            return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('Failed!', status=status.HTTP_412_PRECONDITION_FAILED)
 
 #['GET']
 class PostsByUserPId(generics.ListAPIView):

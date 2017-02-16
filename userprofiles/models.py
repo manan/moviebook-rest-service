@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 
-from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
@@ -14,15 +13,18 @@ from django.conf import settings
 
 # Create your models here.
 
+
 def upload_location_rm_dup(instance, filename):
-    imgname =  '%s.jpg' %(instance.user)
+    imgname = '%s.jpg' % instance.user
     path = os.path.join(settings.MEDIA_ROOT, imgname)
     if os.path.exists(path):
         os.remove(path)
     return imgname
 
+
 def upload_location(instance, filename):
-    return '%s.jpg' %(instance.user)
+    return '%s.jpg' % instance.user
+
 
 class UserProfile(models.Model):
     GENDER_CHOICES = (
@@ -30,16 +32,15 @@ class UserProfile(models.Model):
                       ('F', 'Female'),
                       ('U', 'Unspecified')
                       )
-    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name = 'profile')
-    bio = models.TextField(blank = True, null = True)
-    birth_date = models.DateField(blank = True, null = True)
-    profile_picture = models.FileField(upload_to = upload_location_rm_dup, blank = True, null = True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank = True, null = True)
-    followings = models.ManyToManyField('self', related_name = 'followers', symmetrical=False,
-                                        blank = True, null = True)
-    blocked = models.ManyToManyField('self', related_name = 'blockedby', symmetrical=False,
-                                     blank = True, null = True)
-
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profile')
+    bio = models.TextField(blank=True, null=True)
+    birth_date = models.DateField(blank=True, null=True)
+    profile_picture = models.FileField(upload_to=upload_location_rm_dup, blank=True, null=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
+    followings = models.ManyToManyField('self', related_name='followers', symmetrical=False,
+                                        blank=True, null=True)
+    blocked = models.ManyToManyField('self', related_name='blockedby', symmetrical=False,
+                                     blank=True, null=True)
 
     def __unicode__(self):
         return self.user.username
@@ -179,16 +180,18 @@ class UserProfile(models.Model):
         self.save()
         return True
 
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
-    
+
+
 class Post(models.Model):
-    owner = models.ForeignKey(UserProfile, related_name = 'post')
-    movie_title = models.CharField(max_length = 200)
-    movie_id = models.CharField(max_length = 20)
-    caption = models.CharField(max_length = 200, blank = True, null = True)
+    owner = models.ForeignKey(UserProfile, related_name='post')
+    movie_title = models.CharField(max_length=200)
+    movie_id = models.CharField(max_length=20)
+    caption = models.CharField(max_length=200, blank=True, null=True)
     upload_date = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):

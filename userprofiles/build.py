@@ -1,93 +1,92 @@
-from models import *
 from serializers import *
  
 from django.contrib.auth.models import User
- 
-def buildUsers():
+
+
+def build_users():
     # User 1 - mehtamanan
-    user = User.objects.create_user(username = 'mehtamanan', password='Manan123#', first_name = 'Manan', last_name = 'Mehta')
+    user = User.objects.create_user(username='mehtamanan', password='Manan123#', first_name='Manan', last_name='Mehta')
     user.is_superuser = True
     user.is_staff = True
     user.email = 'mehtamanan@icloud.com'
     user.save()
 
     # User 2 - poojag
-    user = User.objects.create_user(username = 'poojag', password='Pooja123#', first_name = 'Pooja', last_name = 'Ganatra')
+    user = User.objects.create_user(username='poojag', password='Pooja123#', first_name='Pooja', last_name='Ganatra')
     user.is_superuser = False
     user.is_staff = False
     user.email = 'poojaganatra1997@gmail.com'
     user.save()
 
     # User 3 - tanyasingh24
-    user = User.objects.create_user(username = 'tanyasingh24', password = 'Tanya123#', first_name = 'Tanya', last_name = 'Singh')
+    user = User.objects.create_user(username='tanyasingh', password='Tanya123#', first_name='Tanya', last_name='Singh')
     user.is_superuser = False
     user.is_staff = False
     user.email = 'tstanya10@gmail.com'
     user.save()
 
     # User 4 - thejoker
-    user = User.objects.create_user(username = 'thejoker', password = 'Arjun123#', first_name = 'Arjun', last_name = 'Sharma')
+    user = User.objects.create_user(username='thejoker', password='Arjun123#', first_name='Arjun', last_name='Sharma')
     user.is_superuser = False
     user.is_staff = False
     user.email = 'arjunrocks1997@gmail.com'
     user.save()
 
     # User 5 - bangbang
-    user = User.objects.create_user(username = 'bangbang', password = 'Bang123#', first_name = 'Aniket', last_name = 'Bang')
+    user = User.objects.create_user(username='bangbang', password='Bang123#', first_name='Aniket', last_name='Bang')
     user.is_superuser = False
     user.is_staff = False
     user.email = 'bang.aniket@gmail.com'
     user.save()
 
     # User 6 - JagritiSonaSharma
-    user = User.objects.create_user(username = 'JagritiSonaSharma', password = 'Sona123#', first_name = 'Jagriti', last_name = 'Sharma')
+    user = User.objects.create_user(username='sona', password='Sona123#', first_name='Jagriti', last_name='Sharma')
     user.is_superuser = False
     user.is_staff = False
     user.email = 'jagritisharma@hotmail.com'
     user.save()
-    
 
     # UserProfile for user 1
-    userprofile = UserProfile()
-    userprofile.user = User.objects.get(username='mehtamanan')
-    userprofile.bio = 'Computer scientist'
-    userprofile.birth_date = '1997-04-18'
-    userprofile.save()
+    user_profile = UserProfile()
+    user_profile.user = User.objects.get(username='mehtamanan')
+    user_profile.bio = 'Computer scientist'
+    user_profile.birth_date = '1997-04-18'
+    user_profile.save()
 
     # Userprofile for user 2
-    userprofile = UserProfile()
-    userprofile.user = User.objects.get(username='poojag')
-    userprofile.bio = 'Hot stuff'
-    userprofile.birth_date = '1997-08-09'
-    userprofile.save()
+    user_profile = UserProfile()
+    user_profile.user = User.objects.get(username='poojag')
+    user_profile.bio = 'Hot stuff'
+    user_profile.birth_date = '1997-08-09'
+    user_profile.save()
 
     # UserProfile for user 3
-    userprofile = UserProfile()
-    userprofile.user = User.objects.get(username='tanyasingh24')
-    userprofile.bio = 'Non-punjabi singh'
-    userprofile.birth_date = '1997-12-24'
-    userprofile.save()
+    user_profile = UserProfile()
+    user_profile.user = User.objects.get(username='tanyasingh24')
+    user_profile.bio = 'Non-punjabi singh'
+    user_profile.birth_date = '1997-12-24'
+    user_profile.save()
 
     # Userprofile for user 4
-    userprofile = UserProfile()
-    userprofile.user = User.objects.get(username='thejoker')
-    userprofile.bio = 'Non-drinking Punjabi'
-    userprofile.birth_date = '1997-08-09'
-    userprofile.save()
+    user_profile = UserProfile()
+    user_profile.user = User.objects.get(username='thejoker')
+    user_profile.bio = 'Non-drinking Punjabi'
+    user_profile.birth_date = '1997-08-09'
+    user_profile.save()
 
     # UserProfile for user 5
-    userprofile = UserProfile()
-    userprofile.user = User.objects.get(username='bangbang')
-    userprofile.bio = 'Lame'
-    userprofile.birth_date = '1996-06-11'
-    userprofile.save()
+    user_profile = UserProfile()
+    user_profile.user = User.objects.get(username='bangbang')
+    user_profile.bio = 'Lame'
+    user_profile.birth_date = '1996-06-11'
+    user_profile.save()
 
     # Userprofile for user 6
-    userprofile = UserProfile()
-    userprofile.user = User.objects.get(username='JagritiSonaSharma')
-    userprofile.bio = 'Non-badass'
-    userprofile.birth_date = '1997-04-02'
-    userprofile.save()
+    user_profile = UserProfile()
+    user_profile.user = User.objects.get(username='JagritiSonaSharma')
+    user_profile.bio = 'Non-badass'
+    user_profile.birth_date = '1997-04-02'
+    user_profile.save()
 
     # Post 1
     post = Post()
