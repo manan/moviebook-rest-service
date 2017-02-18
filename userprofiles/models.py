@@ -15,11 +15,11 @@ from django.conf import settings
 
 
 def upload_location_rm_dup(instance, filename):
-    imgname = '%s.jpg' % instance.user
-    path = os.path.join(settings.MEDIA_ROOT, imgname)
+    image_name = '%s.jpg' % instance.user
+    path = os.path.join(settings.MEDIA_ROOT, image_name)
     if os.path.exists(path):
         os.remove(path)
-    return imgname
+    return image_name
 
 
 def upload_location(instance, filename):
@@ -45,7 +45,7 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-    def isFollowing(self, username=False, upid=False):
+    def is_following(self, username=False, upid=False):
         if username:
             return self.followings.filter(user__username=username).exists()
         elif upid:
@@ -53,7 +53,7 @@ class UserProfile(models.Model):
         else:
             return False
 
-    def isFollowedBy(self, username=False, upid=False):
+    def is_followed_by(self, username=False, upid=False):
         if username:
             return self.followers.filter(user__username=username).exists()
         elif upid:
@@ -61,7 +61,7 @@ class UserProfile(models.Model):
         else:
             return False
 
-    def isBlocked(self, username=False, upid=False):
+    def is_blocked(self, username=False, upid=False):
         if username:
             return self.blocked.filter(user__username=username).exists()
         elif upid:
@@ -69,7 +69,7 @@ class UserProfile(models.Model):
         else:
             return False
 
-    def isBlockedBy(self, username=False, upid=False):
+    def is_blocked_by(self, username=False, upid=False):
         if username:
             return self.blockedby.filter(user__username=username).exists()
         elif upid:
@@ -79,7 +79,7 @@ class UserProfile(models.Model):
     
     def block(self, username=False, upid=False):
         if username:
-            if self.isBlocked(username=username):
+            if self.is_blocked(username=username):
                 return False
             else:
                 other = User.objects.get(username=username).profile
@@ -90,7 +90,7 @@ class UserProfile(models.Model):
                 other.save()
                 return True
         elif upid:
-            if self.isBlocked(upid=upid):
+            if self.is_blocked(upid=upid):
                 return False
             else:
                 other = UserProfile.objects.get(pk=upid)
@@ -105,7 +105,7 @@ class UserProfile(models.Model):
 
     def unblock(self, username=False, upid=False):
         if username:
-            if self.isBlocked(username=username):
+            if self.is_blocked(username=username):
                 other = self.blocked.get(user__username=username)
                 self.blocked.remove(other)
                 self.save()
@@ -114,7 +114,7 @@ class UserProfile(models.Model):
             else:
                 return False
         elif upid:
-            if self.isBlocked(upid=upid):
+            if self.is_blocked(upid=upid):
                 other = self.blocked.get(pk=upid)
                 self.blocked.remove(other)
                 self.save()
@@ -127,12 +127,12 @@ class UserProfile(models.Model):
 
     def follow(self, username=False, upid=False):
         if username:
-            if self.isFollowing(username) or self.isBlocked(username) or self.isBlockedBy(username):
+            if self.is_following(username) or self.is_blocked(username) or self.is_blocked_by(username):
                 return False
             else:
                 other = UserProfile.objects.get(user__username=username)
         elif upid:
-            if self.isFollowing(upid=upid) or self.isBlocked(upid=upid) or self.isBlockedBy(upid=upid):
+            if self.is_following(upid=upid) or self.is_blocked(upid=upid) or self.is_blocked_by(upid=upid):
                 return False
             else:
                 other = UserProfile.objects.get(pk=upid)
@@ -145,12 +145,12 @@ class UserProfile(models.Model):
 
     def unfollow(self, username=False, upid=False):
         if username:
-            if self.isFollowing(username):
+            if self.is_following(username):
                 other = self.followings.get(user__username=username)
             else:
                 return False
         elif upid:
-            if self.isFollowing(upid=upid):
+            if self.is_following(upid=upid):
                 other = self.followings.get(pk=upid)
             else:
                 return False
@@ -161,15 +161,14 @@ class UserProfile(models.Model):
         self.save()
         return True
 
-    def removeFollower(self, username=False, upid=False):
-        print("Here! A")
+    def remove_follower(self, username=False, upid=False):
         if username:
-            if self.isFollowedBy(username=username):
+            if self.is_followed_by(username=username):
                 other = self.followers.get(user__username=username)
             else:
                 return False
         elif upid:
-            if self.isFollowedBy(upid=upid):
+            if self.is_followed_by(upid=upid):
                 other = self.followers.get(pk=upid)
             else:
                 return False

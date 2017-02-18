@@ -5,8 +5,8 @@ from rest_framework.authtoken import views as view
 urlpatterns = [
     # ADMIN PRIVILEGES
     url('^users/$', views.UserList.as_view(), name='UserList'),
-    url('^profiles/$', views.ProfileList.as_view(), name = 'ProfileList'),
-    url('^posts/$', views.PostList.as_view(), name = 'PostList'),
+    url('^profiles/$', views.ProfileList.as_view(), name='ProfileList'),
+    url('^posts/$', views.PostList.as_view(), name='PostList'),
 
     # ADD USER/PROFILE/POST
     url('^users/add/$', views.AddUser.as_view()),
@@ -16,6 +16,10 @@ urlpatterns = [
     # GET USER DETAILS
     url(r'^users/fetchdetails/$', views.SelfUserDetails.as_view()),
     url(r'^profiles/fetchdetails/$', views.SelfProfileDetails.as_view()),
+
+    # PROFILE PICTURES
+    url(r'^profilepicture/upload/$', views.ProfilePictureUpload.as_view()),
+    url(r'^profilepicture/(?P<username>\w+)/$', views.profile_picture_download),
 
     # SEARCH USERPROFILES
     url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view()),
@@ -28,10 +32,10 @@ urlpatterns = [
     url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
 
     # FOLLOW/UNFOLLOW/BLOCK/UNBLOCK USERS # Don't use for production server
-    url(r'^profiles/follow/userpid=(?P<userpid>\w+)/$', views.FollowUser),
-    url(r'^profiles/unfollow/userpid=(?P<userpid>\w+)/$', views.UnfollowUser),
-    url(r'^profiles/block/userpid=(?P<userpid>\w+)/$', views.BlockUser),
-    url(r'^profiles/unblock/userpid=(?P<userpid>\w+)/$', views.UnblockUser),
+    url(r'^profiles/follow/userpid=(?P<userpid>\w+)/$', views.follow_user),
+    url(r'^profiles/unfollow/userpid=(?P<userpid>\w+)/$', views.unblock_user),
+    url(r'^profiles/block/userpid=(?P<userpid>\w+)/$', views.block_user),
+    url(r'^profiles/unblock/userpid=(?P<userpid>\w+)/$', views.unblock_user),
 
     # UPDATE USERS/PROFILES/POSTS
     url(r'^profiles/update/$', views.UpdateProfile.as_view()),
@@ -44,9 +48,4 @@ urlpatterns = [
     # SPECIAL PURPOSE
     url(r'^newsfeed/$', views.NewsFeed.as_view()),
     url(r'^token-auth/$', view.obtain_auth_token),
-
-    # PROFILE PICTURES
-    url(r'^profilepicture/upload/$', views.ProfilePictureUpload.as_view()),
-    url(r'^profilepicture/(?P<username>\w+)/$', views.ProfilePictureDownload)
-    
 ]

@@ -1,6 +1,6 @@
-from serializers import *
- 
 from django.contrib.auth.models import User
+
+from .models import UserProfile
 
 
 def build_users():
@@ -62,7 +62,7 @@ def build_users():
 
     # UserProfile for user 3
     user_profile = UserProfile()
-    user_profile.user = User.objects.get(username='tanyasingh24')
+    user_profile.user = User.objects.get(username='tanyasingh')
     user_profile.bio = 'Non-punjabi singh'
     user_profile.birth_date = '1997-12-24'
     user_profile.save()
@@ -83,7 +83,7 @@ def build_users():
 
     # Userprofile for user 6
     user_profile = UserProfile()
-    user_profile.user = User.objects.get(username='JagritiSonaSharma')
+    user_profile.user = User.objects.get(username='sona')
     user_profile.bio = 'Non-badass'
     user_profile.birth_date = '1997-04-02'
     user_profile.save()
@@ -122,7 +122,7 @@ def build_users():
 
     # Post 5
     post = Post()
-    post.owner = User.objects.get(username='tanyasingh24').profile
+    post.owner = User.objects.get(username='tanyasingh').profile
     post.movie_title = 'Se7en'
     post.movie_id = 'tt0114369'
     post.caption = 'Seven deadly sins'
@@ -160,17 +160,17 @@ def build_users():
     post.caption = "I found freedom. Losing all hope was freedom."
     post.save()
 
-    User.objects.get(username='tanyasingh24').profile.follow(username='mehtamanan')
+    User.objects.get(username='tanyasingh').profile.follow(username='mehtamanan')
     User.objects.get(username='bangbang').profile.follow(username='mehtamanan')
-    User.objects.get(username='JagritiSonaSharma').profile.follow(username='mehtamanan')
+    User.objects.get(username='sona').profile.follow(username='mehtamanan')
     User.objects.get(username='poojag').profile.follow(username='mehtamanan')
     User.objects.get(username='thejoker').profile.follow(username='mehtamanan')
     User.objects.get(username='mehtamanan').profile.follow(username='poojag')
-    User.objects.get(username='mehtamanan').profile.follow(username='JagritiSonaSharma')
-    User.objects.get(username='thejoker').profile.follow(username='tanyasingh24')
-    User.objects.get(username='tanyasingh24').profile.follow(username='thejoker')
-    User.objects.get(username='tanyasingh24').profile.follow(username='bangbang')
-    User.objects.get(username='JagritiSonaSharma').profile.follow(username='tanyasingh24')
-    User.objects.get(username='JagritiSonaSharma').profile.follow(username='bangbang')
-    User.objects.get(username='bangbang').profile.follow(username='JagritiSonaSharma')
-    User.objects.get(username='JagritiSonaSharma').profile.follow(username='poojag')
+    User.objects.get(username='mehtamanan').profile.follow(username='sona')
+    User.objects.get(username='thejoker').profile.follow(username='tanyasingh')
+    User.objects.get(username='tanyasingh').profile.follow(username='thejoker')
+    User.objects.get(username='tanyasingh').profile.follow(username='bangbang')
+    User.objects.get(username='sona').profile.follow(username='tanyasingh')
+    User.objects.get(username='sona').profile.follow(username='bangbang')
+    User.objects.get(username='bangbang').profile.follow(username='sona')
+    User.objects.get(username='sona').profile.follow(username='poojag')

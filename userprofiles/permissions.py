@@ -1,9 +1,8 @@
 from rest_framework import permissions
 from django.contrib.auth.models import User
-from .models import UserProfile, Post
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
-
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
@@ -17,6 +16,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             userp = User.objects.get(id=user_id).profile
             return owner_id == userp.id
         return False
+
 
 class IsUserOfProfile(permissions.BasePermission):
     

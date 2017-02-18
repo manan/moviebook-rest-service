@@ -1,4 +1,3 @@
-
 """
 Django settings for themoviebookAPI project.
 
@@ -35,11 +34,11 @@ INSTALLED_APPS = [
     'userprofiles',
 ]
 
-# Uncomment whitenoise.middleware.WhiteNoiseMiddleware
-# to handle static files
+# Comment whitenoise.middleware.WhiteNoiseMiddleware
+# to handle static files using a different web server
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    #'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -77,7 +76,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -95,7 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 LANGUAGE_CODE = 'en-us'
@@ -104,15 +101,13 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")
 
-
-# Heroku server configuratioins 
+# Heroku server configurations
 DATABASES['default'] = dj_database_url.config()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ALLOWED_HOSTS = ['*']

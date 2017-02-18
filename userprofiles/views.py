@@ -1,57 +1,55 @@
-from django.shortcuts import render
-from rest_framework import generics, permissions
-
-from django.http import HttpResponseRedirect, HttpResponse
-from rest_framework.response import Response
-from rest_framework import status
-
-from .models import UserProfile, Post
-from .serializers import UserProfileReadSerializer, UserProfileCreateSerializer
-from .serializers import UserProfileUpdateSerializer, UserProfileSelfReadSerializer
-from .serializers import RegistrationSerializer, PostSerializer
-from .permissions import IsOwnerOrReadOnly
-from .permissions import IsUserOfProfile
-from django.contrib.auth.models import User
-
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.views import APIView
-
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from rest_framework.decorators import api_view
-from rest_framework.decorators import authentication_classes
-from rest_framework.decorators import permission_classes
-
-from django.db.models import Q
-
-from django.contrib.auth.hashers import make_password
-
-from rest_framework.authtoken.models import Token
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
-
+# from django.conf import settings
+# from django.shortcuts import render
 from datetime import datetime
 from datetime import timedelta
 
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from django.db.models import Q
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import UserProfile, Post
+
 import os
+
+from .serializers import UserProfileReadSerializer, UserProfileCreateSerializer
+from .serializers import UserProfileUpdateSerializer, UserProfileSelfReadSerializer
+from .serializers import RegistrationSerializer, PostSerializer
+
+from .permissions import IsOwnerOrReadOnly
+from .permissions import IsUserOfProfile
+
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.decorators import authentication_classes
+from rest_framework.decorators import permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework import generics, permissions
+from rest_framework.authentication import TokenAuthentication
 # Create your views here.
+
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
-def ProfilePictureDownload(request, username):
-    if request.user.profile.isBlockedBy(username):
-        failedResponse = '{"detail":"You do not have permission to perform this action."}'
-        return HttpResponse(failedResponse, status=status.HTTP_401_UNAUTHORIZED)
+def profile_picture_download(request, username):
+    if request.user.profile.is_blocked_by(username):
+        failed_response = '{"detail": "User is blocked."}'
+        return HttpResponse(failed_response)
     # Use settings.MEDIA_ROOT for production
-    img =  os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media_cdn'), username + '.jpg')
+    img = os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media_cdn'), username + '.jpg')
     try:
         with open(img, "rb") as f:
             return HttpResponse(f.read(), content_type="image/jpeg")
     except IOError:
-        failedResponse = '{"detail": "No image found"}'
-        return HttpResponse(failedResponse)
+        failed_response = '{"detail": "No image found"}'
+        return HttpResponse(failed_response)
 
-#['POST']
+
+# ['POST']
 class ProfilePictureUpload(APIView):
     """
     https://themoviebook.herokuapp.com/profilepicture/upload/
@@ -69,12 +67,13 @@ class ProfilePictureUpload(APIView):
 
     def post(self, request, format=None):
         file_obj = request.FILES['file']
-        userprofile = request.user.profile
-        userprofile.profile_picture = file_obj
-        userprofile.save()
+        user_profile = request.user.profile
+        user_profile.profile_picture = file_obj
+        user_profile.save()
         return Response(status=204)
 
-#['GET']
+
+# ['GET']
 class NewsFeed(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/newsfeed/
@@ -98,7 +97,8 @@ class NewsFeed(generics.ListAPIView):
         newsfeed.sort(key=lambda x: x.upload_date, reverse=True)
         return newsfeed
 
-#['DELETE']
+
+# ['DELETE']
 class DeletePost(generics.DestroyAPIView):
     """
     https://themoviebook.herokuapp.com/posts/delete/postpk=<pk>/
@@ -109,17 +109,15 @@ class DeletePost(generics.DestroyAPIView):
     On invalid pk: {"detail":"Not found."}
     On invalid user (not owner): { "detail": "You do not have permission to perform this action." }
     """
-    model = Post
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
-    lookup_field = 'pk'
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
         IsOwnerOrReadOnly,
     ]
 
-#['PUT', 'PATCH']
+
+# ['PUT', 'PATCH']
 class UpdateUser(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/users/update/
@@ -143,8 +141,9 @@ class UpdateUser(generics.UpdateAPIView):
 
     def get_object(self):
         return self.request.user
-    
-#['PUT', 'PATCH']
+
+
+# ['PUT', 'PATCH']
 class UpdatePost(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/posts/update/postpk=<pk>/
@@ -165,7 +164,8 @@ class UpdatePost(generics.UpdateAPIView):
     def get_queryset(self):
         return self.request.user.profile.post.all()
 
-#['PUT', 'PATCH']
+
+# ['PUT', 'PATCH']
 class UpdateProfile(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/update/
@@ -185,122 +185,104 @@ class UpdateProfile(generics.UpdateAPIView):
         return self.request.user.profile
 
     def perform_update(self, serializer):
-        newFollowingSet = self.request.user.profile.followings.all()
+        new_followings = self.request.user.profile.followings.all()
         userp = self.request.user.profile
         if 'followings' in self.request.data:
-            newFollowingSet = []
+            new_followings = []
             for following in self.request.data['followings']:
-                if not userp.isBlockedBy(upid=following):
-                    newFollowingSet.append(following)
+                if not userp.is_blocked_by(upid=following):
+                    new_followings.append(following)
         if 'blocked' in self.request.data:
             for b in self.request.data['blocked']:
-                userp.removeFollower(upid=b)
-        serializer.save(followings=newFollowingSet)
+                userp.remove_follower(upid=b)
+        serializer.save(followings=new_followings)
 
-#['GET']
+
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def UnfollowUser(request, userpid):
+def unfollow_user(request, userpid):
     """
     GET request: result: authenticated user unfollows user w userpid
 
     Required Keys for GET: userpid
-
-    On invalid userpid: 412 Precondition Failed
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
     """
     try:
         userp = request.user.profile
-        bool = userp.unfollow(upid=userpid)
-        if bool:
+        success = userp.unfollow(upid=userpid)
+        if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}')
+    except Exception as e:
+        return HttpResponse('{"detail": "%s"}' % e.message)
 
-#['GET']
+
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def FollowUser(request, userpid):
+def follow_user(request, userpid):
     """
     GET request: result: authenticated user follows user w userpid
 
     Required Keys for GET: userpid
-
-    On invalid userpid: 412 Precondition Failed
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
     """
     try:
         userp = request.user.profile
-        bool = userp.follow(upid=userpid)
-        if bool:
+        success = userp.follow(upid=userpid)
+        if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}')
+    except Exception as e:
+        return HttpResponse('{"detail": "%s"}' % e.message)
 
-#['GET']
+
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def UnblockUser(request, userpid):
+def unblock_user(request, userpid):
     """
     GET request: result: authenticated user unblocks user w userpid
 
     Required Keys for GET: userpid
-
-    On invalid username: 412 Precondition Failed
-    On invalid method: 405 Method not allowed 
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
     """
     try:
         userp = request.user.profile
-        bool = userp.unblock(upid=userpid)
-        if bool:
+        success = userp.unblock(upid=userpid)
+        if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}')
+    except Exception as e:
+        return HttpResponse('{"detail": "%s"}' % e.message)
 
-#['GET']
+
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def BlockUser(request, userpid):
+def block_user(request, userpid):
     """
     GET request: result: authenticated user blocks user w given userpid
 
     Required Keys for GET: userpid
-
-    On invalid userpid: 412 Precondition Failed
-    If not formatted properly: 412 Precondition Failed
-    If username2 doesn't follow username1: 412 Precondition Failed
     """
     try:
         userp = request.user.profile
-        bool = userp.block(upid=userpid)
-        if bool:
+        success = userp.block(upid=userpid)
+        if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
-            return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
-    except Exception:
-        return HttpResponse('{"detail": "Operation failed."}', status=status.HTTP_412_PRECONDITION_FAILED)
+            return HttpResponse('{"detail": "Operation failed."}')
+    except Exception as e:
+        return HttpResponse('{"detail": "%s"}' % e.message)
 
 
-
-#['GET']
+# ['GET']
 class PostsByUserPId(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/posts/search/userpid=<id>/
@@ -320,11 +302,12 @@ class PostsByUserPId(generics.ListAPIView):
 
     def get_queryset(self):
         queryuser = UserProfile.objects.get(pk=self.kwargs['userpid'])
-        if self.request.user.profile.isBlockedBy(username=queryuser.user.username):
-            raise Exception("The user you're trying to find has blocked you. Savage. Lmao.");
+        if self.request.user.profile.is_blocked_by(username=queryuser.user.username):
+            raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
         return queryuser.post.all()
 
-#['GET']
+
+# ['GET']
 class PostsByUsername(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/posts/search/username=<username>/
@@ -344,12 +327,13 @@ class PostsByUsername(generics.ListAPIView):
     ]
 
     def get_queryset(self):
-        if self.request.user.profile.isBlockedBy(username=self.kwargs['username']):
-            raise Exception("The user you're trying to find has blocked you. Savage. Lmao.");
+        if self.request.user.profile.is_blocked_by(username=self.kwargs['username']):
+            raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
         queryuser = User.objects.get(username=self.kwargs['username']).profile
         return queryuser.post.all()
 
-#['GET']
+
+# ['GET']
 class PostsByIDs(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/posts/search/postids=<id1>,<id2>...<idn>/
@@ -374,11 +358,12 @@ class PostsByIDs(generics.ListAPIView):
         for everyid in ids:
             try:
                 ret.add(Post.objects.get(pk=everyid))
-            except (Post.DoesNotExist):
+            except Post.DoesNotExist:
                 pass
         return ret
 
-#['GET']
+
+# ['GET']
 class ProfilesByIDs(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/search/userpids=<id1>,<id2>,..<idn>/
@@ -404,14 +389,15 @@ class ProfilesByIDs(generics.ListAPIView):
         for everyid in ids:
             try:
                 userprofile = UserProfile.objects.get(pk=everyid)
-                if not self.request.user.profile.isBlockedBy(userprofile.user.username):
+                if not self.request.user.profile.is_blocked_by(userprofile.user.username):
                     ret.add(UserProfile.objects.get(pk=everyid))
-            except (UserProfile.DoesNotExist):
+            except UserProfile.DoesNotExist:
                 pass
         return ret
 
-#['GET']
-class SearchProfiles(generics.ListAPIView): # DONE
+
+# ['GET']
+class SearchProfiles(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/search/name=<name>/
     GET request fetches all the userprofiles with an approximate 
@@ -431,26 +417,27 @@ class SearchProfiles(generics.ListAPIView): # DONE
     def get_queryset(self):
         name = self.kwargs['name'].strip()
         ret = set()
-        if (len(name.split(' ')) == 1):
-            for every in User.objects.filter(Q(first_name__icontains = name)
-                                             | Q(last_name__icontains = name)
-                                             | Q(username__icontains = name)):
-                if not self.request.user.profile.isBlockedBy(username=every.username):
+        if len(name.split(' ')) == 1:
+            for every in User.objects.filter(Q(first_name__icontains=name)
+                                             | Q(last_name__icontains=name)
+                                             | Q(username__icontains=name)):
+                if not self.request.user.profile.is_blocked_by(username=every.username):
                     ret.add(every.profile)
-        elif (len(name.split(' ')) >= 2):
+        elif len(name.split(' ')) >= 2:
             fname = name.split(' ')[0]
             lname = name.split(' ')[1]
-            for every in User.objects.filter(Q(first_name__contains = fname) |
-                                             Q(last_name__contains = lname) |
-                                             Q(first_name__contains = lname) |
-                                             Q(last_name__contains = fname) |
-                                             Q(username__contains = fname) |
-                                             Q(username__contains = lname)):
-                if not self.request.user.profile.isBlockedBy(username=every.username):
+            for every in User.objects.filter(Q(first_name__contains=fname) |
+                                             Q(last_name__contains=lname) |
+                                             Q(first_name__contains=lname) |
+                                             Q(last_name__contains=fname) |
+                                             Q(username__contains=fname) |
+                                             Q(username__contains=lname)):
+                if not self.request.user.profile.is_blocked_by(username=every.username):
                     ret.add(every.profile)
         return ret
 
-#['GET']
+
+# ['GET']
 class SearchProfileByUsername(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/search/username=<username>/
@@ -468,11 +455,12 @@ class SearchProfileByUsername(generics.RetrieveAPIView):
     ]
 
     def get_object(self):
-        if (self.request.user.profile.isBlockedBy(username=self.kwargs['username'])):
+        if self.request.user.profile.is_blocked_by(username=self.kwargs['username']):
             raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
         return User.objects.get(username=self.kwargs['username']).profile
 
-#['GET']
+
+# ['GET']
 class SelfUserDetails(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/users/fetchdetails/
@@ -488,7 +476,8 @@ class SelfUserDetails(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
-#['GET']
+
+# ['GET']
 class SelfProfileDetails(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/fetchdetails/
@@ -504,7 +493,8 @@ class SelfProfileDetails(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user.profile
 
-#['POST']
+
+# ['POST']
 class AddUser(generics.CreateAPIView):
     """
     https://themoviebook.herokuapp.com/users/add/
@@ -522,7 +512,8 @@ class AddUser(generics.CreateAPIView):
         permissions.AllowAny,
     ]
 
-#['POST']
+
+# ['POST']
 class AddPost(generics.CreateAPIView):
     """
     https://themoviebook.herokuapp.com/posts/add/
@@ -543,7 +534,8 @@ class AddPost(generics.CreateAPIView):
         IsOwnerOrReadOnly,
     ]
 
-#['POST']
+
+# ['POST']
 class AddProfile(generics.CreateAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/add/
@@ -562,7 +554,8 @@ class AddProfile(generics.CreateAPIView):
         IsUserOfProfile,
     ]
 
-#['GET']
+
+# ['GET']
 class UserList(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/users/
@@ -578,7 +571,8 @@ class UserList(generics.ListAPIView):
         permissions.IsAdminUser,
     ]
 
-#['GET']
+
+# ['GET']
 class PostList(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/posts/
@@ -594,7 +588,8 @@ class PostList(generics.ListAPIView):
         permissions.IsAdminUser,
     ]
 
-#['GET']
+
+# ['GET']
 class ProfileList(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/
