@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 
-from .models import UserProfile, Post
+from .models import UserProfile
+from posts.models import Post
 
 
 def build_users():

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'userprofiles',
+    'posts',
 ]
 
 # Comment whitenoise.middleware.WhiteNoiseMiddleware

@@ -6,12 +6,10 @@ urlpatterns = [
     # ADMIN PRIVILEGES
     url('^users/$', views.UserList.as_view(), name='UserList'),
     url('^profiles/$', views.ProfileList.as_view(), name='ProfileList'),
-    url('^posts/$', views.PostList.as_view(), name='PostList'),
 
-    # ADD USER/PROFILE/POST
+    # ADD USER/PROFILE/
     url('^users/add/$', views.AddUser.as_view()),
-    url('^profiles/add/$', views.AddProfile.as_view()),
-    url('^posts/add/$', views.AddPost.as_view()),
+    url('^add/$', views.AddProfile.as_view()),
 
     # GET USER DETAILS
     url(r'^users/fetchdetails/$', views.SelfUserDetails.as_view()),
@@ -26,26 +24,16 @@ urlpatterns = [
     url(r'^profiles/search/userpids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view()),
     url(r'^profiles/search/username=(?P<username>\w+)/$', views.SearchProfileByUsername.as_view()),
 
-    # SEARCH POSTS
-    url(r'^posts/search/username=(?P<username>.+)/$', views.PostsByUsername.as_view()),
-    url(r'^posts/search/userpid=(?P<userpid>.+)/$', views.PostsByUserPId.as_view()),
-    url(r'^posts/search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
-
     # FOLLOW/UNFOLLOW/BLOCK/UNBLOCK USERS # Don't use for production server
     url(r'^profiles/follow/userpid=(?P<userpid>\w+)/$', views.follow_user),
     url(r'^profiles/unfollow/userpid=(?P<userpid>\w+)/$', views.unblock_user),
     url(r'^profiles/block/userpid=(?P<userpid>\w+)/$', views.block_user),
     url(r'^profiles/unblock/userpid=(?P<userpid>\w+)/$', views.unblock_user),
 
-    # UPDATE USERS/PROFILES/POSTS
+    # UPDATE USERS/PROFILES/
     url(r'^profiles/update/$', views.UpdateProfile.as_view()),
-    url(r'^posts/update/postpk=(?P<pk>.+)/$', views.UpdatePost.as_view()),
     url(r'^users/update/$', views.UpdateUser.as_view()),
 
-    # DELETE POSTS
-    url(r'^posts/delete/postpk=(?P<pk>.+)/$', views.DeletePost.as_view()),
-
     # SPECIAL PURPOSE
-    url(r'^newsfeed/$', views.NewsFeed.as_view()),
     url(r'^token-auth/$', view.obtain_auth_token),
 ]

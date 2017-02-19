@@ -185,13 +185,3 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
 
-
-class Post(models.Model):
-    owner = models.ForeignKey(UserProfile, related_name='post')
-    movie_title = models.CharField(max_length=200)
-    movie_id = models.CharField(max_length=20)
-    caption = models.CharField(max_length=200, blank=True, null=True)
-    upload_date = models.DateTimeField(auto_now_add=True)
-
-    def __unicode__(self):
-        return self.movie_title
