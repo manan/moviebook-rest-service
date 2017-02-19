@@ -10,3 +10,11 @@ cd userprofiles
 
 rm *.pyc
 rm *.py~
+rm -rf migrations
+
+cd ..
+cd posts
+
+rm *.pyc
+rm *.py~
+rm -rf migrations
