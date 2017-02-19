@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd themoviebookAPI
+cd MoviebookAPI
 
 rm *.pyc
 rm *.py~

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-cd ~/Desktop/TheMovieBookAPI/themoviebookAPI/userprofiles/
+cd ~/Desktop/MovieBookAPI/MoviebookAPI/userprofiles/
 
 rm *.pyc
 rm *.py~
 
 cd ..
-cd themoviebookAPI/
+cd MoviebookAPI/
 
 rm *.pyc
 rm *py~
