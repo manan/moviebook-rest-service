@@ -14,14 +14,6 @@ from django.conf import settings
 # Create your models here.
 
 
-def upload_location_rm_dup(instance, filename):
-    image_name = '%s.jpg' % instance.user
-    path = os.path.join(settings.MEDIA_ROOT, image_name)
-    if os.path.exists(path):
-        os.remove(path)
-    return image_name
-
-
 def upload_location(instance, filename):
     return '%s.jpg' % instance.user
 
@@ -35,7 +27,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
-    profile_picture = models.FileField(upload_to=upload_location_rm_dup, blank=True, null=True)
+    profile_picture = models.FileField(upload_to=upload_location, blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
     followings = models.ManyToManyField('self', related_name='followers', symmetrical=False,
                                         blank=True, null=True)
