@@ -138,7 +138,7 @@ class PostsByUsername(generics.ListAPIView):
 
 
 # ['GET']
-class PostsByIDs(generics.ListAPIView):
+class PostsByPostIDs(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/posts/search/postids=<id1>,<id2>...<idn>/
     GET request fetches all the posts with the given post ids
@@ -171,12 +171,12 @@ class PostsByIDs(generics.ListAPIView):
 class AddPost(generics.CreateAPIView):
     """
     https://themoviebook.herokuapp.com/posts/add/
-    POST request body: {"owner":<userpid>, "movie_title":<bio>, "movie_id":"<imdbid>", "caption":"<cap>"}
+    POST request body: {"owner":<userpid>, "movie_title":<bio>, "imdb_id":"<imdbid>", "caption":"<cap>"}
     adds post (with owner being the userp specified) to the db
 
-    Required Keys for POST: user, movie_id
+    Required Keys for POST: user, imdb_id
 
-    On missing movie_id field: {"movie_id":["This field is required."]}
+    On missing imdb_id field: {"imdb_id":["This field is required."]}
     On missing owner field: {"owner":["This field is required."]}
     If Post.owner != self.request.user, permission denied
     """

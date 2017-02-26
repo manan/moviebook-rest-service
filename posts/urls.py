@@ -11,7 +11,7 @@ urlpatterns = [
     # SEARCH POSTS
     url(r'^search/username=(?P<username>.+)/$', views.PostsByUsername.as_view()),
     url(r'^search/userpid=(?P<userpid>.+)/$', views.PostsByUserPId.as_view()),
-    url(r'^search/postids=(?P<ids>.+)/$', views.PostsByIDs.as_view()),
+    url(r'^search/postids=(?P<ids>.+)/$', views.PostsByPostIDs.as_view()),
 
     # UPDATE USERS/PROFILES/POSTS
     url(r'^update/(?P<pk>.+)/$', views.UpdatePost.as_view()),
