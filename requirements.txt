@@ -20,4 +20,3 @@ rsa==3.4.2
 s3transfer==0.1.10
 six==1.10.0
 whitenoise==3.3.0
-psycopg2==2.6.2

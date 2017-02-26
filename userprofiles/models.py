@@ -1,4 +1,3 @@
-
 from __future__ import unicode_literals
 
 from django.db import models
@@ -8,14 +7,13 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-import os
 from django.conf import settings
 
 # Create your models here.
 
 
 def upload_location(instance, filename):
-    return '%s.jpg' % instance.user
+    return 'profilepicture_%s.jpg' % instance.user
 
 
 class UserProfile(models.Model):
@@ -35,6 +33,9 @@ class UserProfile(models.Model):
                                      blank=True, null=True)
 
     def __unicode__(self):
+        return self.user.username
+
+    def __str__(self):
         return self.user.username
 
     def is_following(self, username=False, upid=False):

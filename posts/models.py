@@ -14,3 +14,6 @@ class Post(models.Model):
 
     def __unicode__(self):
         return self.movie_title
+
+    def __str__(self):
+        return self.movie_title

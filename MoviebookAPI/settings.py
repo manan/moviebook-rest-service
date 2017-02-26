@@ -116,7 +116,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Canada/Pacific'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True

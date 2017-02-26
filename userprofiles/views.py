@@ -1,15 +1,11 @@
-# from django.conf import settings
-# from django.shortcuts import render
-
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import UserProfile
-
-import os
 
 from .serializers import UserProfileReadSerializer, UserProfileCreateSerializer
 from .serializers import UserProfileUpdateSerializer, UserProfileSelfReadSerializer
@@ -34,16 +30,17 @@ from rest_framework.authentication import TokenAuthentication
 @permission_classes((permissions.IsAuthenticated,))
 def profile_picture_download(request, username):
     if request.user.profile.is_blocked_by(username):
-        failed_response = '{"detail": "User is blocked."}'
-        return HttpResponse(failed_response)
-    # Use settings.MEDIA_ROOT for production
-    img = os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media_cdn'), username + '.jpg')
+        return HttpResponse('{"detail": "User is blocked."}')
     try:
-        with open(img, "rb") as f:
-            return HttpResponse(f.read(), content_type="image/jpeg")
-    except IOError:
-        failed_response = '{"detail": "No image found"}'
-        return HttpResponse(failed_response)
+        image_url = User.objects.get(username=username).profile.profile_picture.url
+        print(image_url)
+    except User.DoesNotExist:
+        return HttpResponse('{"detail": "User not found."}')
+    if image_url is None:
+        return HttpResponse('{"detail": "No image found."}')
+    return render(request,
+                  "profilepicture.html",
+                  {'imageurl': image_url})
 
 
 # ['POST']

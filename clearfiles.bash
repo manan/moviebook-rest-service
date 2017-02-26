@@ -4,13 +4,14 @@ cd MoviebookAPI
 
 rm *.pyc
 rm *.py~
-
+rm -rf __pycache__
 cd ..
 cd userprofiles
 
 rm *.pyc
 rm *.py~
 rm -rf migrations
+rm -rf __pycache__
 
 cd ..
 cd posts
@@ -18,3 +19,4 @@ cd posts
 rm *.pyc
 rm *.py~
 rm -rf migrations
+rm -rf __pycache__
