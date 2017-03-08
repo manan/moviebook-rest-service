@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'userprofiles',
     'posts',
+    'movies',
 ]
 
 # Comment whitenoise.middleware.WhiteNoiseMiddleware
