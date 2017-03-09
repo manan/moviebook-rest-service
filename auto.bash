@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd ~/Desktop/MovieBookAPI/MoviebookAPI/userprofiles/
+cd ~/Desktop/MovieBookAPI-Project/MoviebookAPI/userprofiles/
 
 rm *.pyc
 rm *.py~

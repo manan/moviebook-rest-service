@@ -55,13 +55,15 @@ class DeletePost(generics.DestroyAPIView):
     """
     model = Post
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
     lookup_field = 'pk'
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
         IsOwner,
     ]
+
+    def get_queryset(self):
+        return self.request.user.profile.post.all()
 
 
 # ['PUT', 'PATCH']
@@ -77,6 +79,7 @@ class UpdatePost(generics.UpdateAPIView):
     model = Post
     serializer_class = PostSerializer
     lookup_field = 'pk'
+    authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
         IsOwner
@@ -152,7 +155,7 @@ class PostsByPostIDs(generics.ListAPIView):
     serializer_class = PostSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
+        permissions.IsAuthenticated,
     ]
 
     def get_queryset(self):
@@ -161,7 +164,9 @@ class PostsByPostIDs(generics.ListAPIView):
         ret = set()
         for every_id in ids:
             try:
-                ret.add(Post.objects.get(pk=every_id))
+                temp_post = Post.objects.get(pk=every_id)
+                if not self.request.user.profile.is_blocked_by(upid=temp_post.owner):
+                    ret.add(Post.objects.get(pk=every_id))
             except Post.DoesNotExist:
                 pass
         return ret

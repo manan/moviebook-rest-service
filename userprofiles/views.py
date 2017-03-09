@@ -114,6 +114,7 @@ class UpdateProfile(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         new_followings = self.request.user.profile.followings.all()
+        new_blocked = self.request.user.profile.blocked.all()
         user_profile = self.request.user.profile
         if 'followings' in self.request.data:
             new_followings = []
@@ -121,9 +122,11 @@ class UpdateProfile(generics.UpdateAPIView):
                 if not user_profile.is_blocked_by(upid=following):
                     new_followings.append(following)
         if 'blocked' in self.request.data:
+            new_blocked = []
             for b in self.request.data['blocked']:
                 user_profile.remove_follower(upid=b)
-        serializer.save(followings=new_followings)
+                new_blocked.append(b)
+        serializer.save(followings=new_followings, blocked=new_blocked)
 
 
 @csrf_exempt

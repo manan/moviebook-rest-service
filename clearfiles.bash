@@ -20,3 +20,11 @@ rm *.pyc
 rm *.py~
 rm -rf migrations
 rm -rf __pycache__
+
+cd ..
+cd movies
+
+rm *.pyc
+rm *.py~
+rm -rf migrations
+rm -rf __pycache__
