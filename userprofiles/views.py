@@ -392,7 +392,7 @@ class UserList(generics.ListAPIView):
     Authentication: Restricted to admin users only
     """
     model = User
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     serializer_class = RegistrationSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
@@ -409,7 +409,7 @@ class ProfileList(generics.ListAPIView):
     Authentication: Restricted to admin users only 
     """
     model = UserProfile
-    queryset = UserProfile.objects.all()
+    queryset = UserProfile.objects.all().order_by('id')
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAdminUser,
