@@ -9,7 +9,7 @@ urlpatterns = [
 
     # ADD USER/PROFILE/
     url('^users/add/$', views.AddUser.as_view()),
-    url('^add/$', views.AddProfile.as_view()),
+    url('^profiles/add/$', views.AddProfile.as_view()),
 
     # GET USER DETAILS
     url(r'^users/fetchdetails/$', views.SelfUserDetails.as_view()),
