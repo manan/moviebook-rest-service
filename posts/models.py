@@ -8,7 +8,8 @@ from userprofiles.models import UserProfile
 class Post(models.Model):
     owner = models.ForeignKey(UserProfile, related_name='post')
     movie_title = models.CharField(max_length=200)
-    imdb_id = models.CharField(max_length=20)
+    # IMDB id
+    movie_id = models.CharField(max_length=20)
     caption = models.CharField(max_length=200, blank=True, null=True)
     upload_date = models.DateTimeField(auto_now_add=True)
 
