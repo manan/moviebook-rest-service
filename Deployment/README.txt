@@ -7,6 +7,8 @@
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     ALLOWED_HOSTS = ['*']
 ] to settings.py
++ add psycopg2-2.6.2 to requirements.txt
++ pip install whitenoise dj_database_url gunicorn
 + Create remote on heroku git
 + Push git repository to heroku git
 

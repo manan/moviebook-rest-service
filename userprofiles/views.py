@@ -375,7 +375,7 @@ class AddProfile(generics.CreateAPIView):
     If user.id != UserProfile.user, permission denied
     """
     model = UserProfile
-    serializer_class = UserProfileCreateSerializer
+    serializer_class = UserProfileReadSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
