@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from userprofiles.models import UserProfile
 # Create your models here.
@@ -18,3 +19,22 @@ class Post(models.Model):
 
     def __str__(self):
         return self.movie_title
+
+    def like(self, username, r):
+        print(self.movie_title)
+        l = Like(rating=r)
+        l.post = self
+        l.likedby = UserProfile.objects.get(user__username=username)
+        l.save()
+
+
+class Like(models.Model):
+    post = models.ForeignKey(Post, related_name='likes')
+    likedby = models.ForeignKey(UserProfile, related_name='all_likes')
+    rating = models.IntegerField(default=0, validators=[MaxValueValidator(10), MinValueValidator(0)])
+
+    def __unicode__(self):
+        return self.likedby.user.username
+
+    def __str__(self):
+        return self.likedby.user.username

@@ -4,6 +4,10 @@ from datetime import datetime
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.views import APIView
 
 from .models import Post
 from userprofiles.models import UserProfile
@@ -12,9 +16,31 @@ from .serializers import PostSerializer
 
 from .permissions import IsOwnerOrReadOnly, IsOwner
 
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.authentication import TokenAuthentication
 # Create your views here.
+
+
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
+def like_post(request, pid, ra):
+    try:
+        u = request.user
+        user_profile = u.profile
+        p = None
+        for person in user_profile.followings.all():
+            for post in person.post.all():
+                if post.id == pid:
+                    p = post
+                    break
+        if p is None:
+            Post.objects.get(pk=pid)
+        p.like(u.username, ra)
+        return JsonResponse({'detail': 'successful'}, safe=False, status=status.HTTP_200_OK)
+    except Exception:
+        return JsonResponse({'detail': 'failed'}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ['GET']

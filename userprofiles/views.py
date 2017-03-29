@@ -133,7 +133,7 @@ class UpdateProfile(generics.UpdateAPIView):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def unfollow_user(request, user_pid):
+def unfollow_user(request, userpid):
     """
     GET request: result: authenticated user unfollows user w userpid
 
@@ -141,7 +141,7 @@ def unfollow_user(request, user_pid):
     """
     try:
         user_profile = request.user.profile
-        success = user_profile.unfollow(upid=user_pid)
+        success = user_profile.unfollow(upid=userpid)
         if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
@@ -154,7 +154,7 @@ def unfollow_user(request, user_pid):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def follow_user(request, user_pid):
+def follow_user(request, userpid):
     """
     GET request: result: authenticated user follows user w userpid
 
@@ -162,7 +162,7 @@ def follow_user(request, user_pid):
     """
     try:
         user_profile = request.user.profile
-        success = user_profile.follow(upid=user_pid)
+        success = user_profile.follow(upid=userpid)
         if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
@@ -175,7 +175,7 @@ def follow_user(request, user_pid):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def unblock_user(request, user_pid):
+def unblock_user(request, userpid):
     """
     GET request: result: authenticated user unblocks user w userpid
 
@@ -183,7 +183,7 @@ def unblock_user(request, user_pid):
     """
     try:
         user_profile = request.user.profile
-        success = user_profile.unblock(upid=user_pid)
+        success = user_profile.unblock(upid=userpid)
         if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:
@@ -196,7 +196,7 @@ def unblock_user(request, user_pid):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
-def block_user(request, user_pid):
+def block_user(request, userpid):
     """
     GET request: result: authenticated user blocks user w given userpid
 
@@ -204,7 +204,7 @@ def block_user(request, user_pid):
     """
     try:
         user_profile = request.user.profile
-        success = user_profile.block(upid=user_pid)
+        success = user_profile.block(upid=userpid)
         if success:
             return HttpResponse('{"detail": "Operation successful."}', status=status.HTTP_200_OK)
         else:

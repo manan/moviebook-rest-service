@@ -8,6 +8,8 @@ urlpatterns = [
     # ADD USER/PROFILE/POST
     url('^add/$', views.AddPost.as_view()),
 
+    url('^like/postid=(?P<pid>.+)/rating=(?P<ra>.+)/$', views.like_post),
+
     # SEARCH POSTS
     url(r'^search/username=(?P<username>.+)/$', views.PostsByUsername.as_view()),
     url(r'^search/userpid=(?P<userpid>.+)/$', views.PostsByUserPId.as_view()),
