@@ -25,19 +25,27 @@ from rest_framework.authentication import TokenAuthentication
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
-def like_post(request, pid, ra):
+def like_post(request, pid, ra, userpid):
+    try:
+        u = request.user # user who is logged
+        post_owner = UserProfile.objects.get(pk=userpid)  # userprofile whose post it is
+        p = post_owner.post.get(pk=pid)  # whose post it is
+        p.like(u.profile, ra)
+        return JsonResponse({'detail': 'successful'}, safe=False, status=status.HTTP_200_OK)
+    except Exception:
+        return JsonResponse({'detail': 'failed'}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((permissions.IsAuthenticated,))
+def comment_post(request, pid, co, userpid):
     try:
         u = request.user
-        user_profile = u.profile
-        p = None
-        for person in user_profile.followings.all():
-            for post in person.post.all():
-                if post.id == pid:
-                    p = post
-                    break
-        if p is None:
-            Post.objects.get(pk=pid)
-        p.like(u.username, ra)
+        post_owner = UserProfile.objects.get(pk=userpid)
+        p = post_owner.post.get(pk=pid)
+        p.comment(u.profile, co)
         return JsonResponse({'detail': 'successful'}, safe=False, status=status.HTTP_200_OK)
     except Exception:
         return JsonResponse({'detail': 'failed'}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
