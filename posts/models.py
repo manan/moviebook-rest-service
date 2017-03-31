@@ -19,16 +19,16 @@ class Post(models.Model):
     def __str__(self):
         return self.movie_title
 
-    def like(self, uprofile, r):
+    def like(self, user_profile, r):
         l = Like(rating=r)
         l.post = self
-        l.likeby = uprofile
+        l.likeby = user_profile
         l.save()
 
-    def comment(self, uprofile, co):
+    def comment(self, user_profile, co):
         c = Comment(content=co)
         c.post = self
-        c.commentby = uprofile
+        c.commentby = user_profile
         c.save()
 
 

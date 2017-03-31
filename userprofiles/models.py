@@ -23,15 +23,12 @@ class UserProfile(models.Model):
                       ('U', 'Unspecified')
                       )
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profile')
-    bio = models.TextField(blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True)
-    # TODO: profile_picture is a non-null because default, change it later
-    profile_picture = models.FileField(upload_to=upload_location, default="default-5.jpg", blank=True, null=True)
+    bio = models.TextField(blank=True, null=False, default="")
+    birth_date = models.DateField(blank=False, null=False)
+    profile_picture = models.FileField(upload_to=upload_location, default="default-5.jpg", blank=False, null=False)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
-    followings = models.ManyToManyField('self', related_name='followers', symmetrical=False,
-                                        blank=True, null=True)
-    blocked = models.ManyToManyField('self', related_name='blockedby', symmetrical=False,
-                                     blank=True, null=True)
+    followings = models.ManyToManyField('self', related_name='followers', symmetrical=False)
+    blocked = models.ManyToManyField('self', related_name='blockedby', symmetrical=False)
 
     def __unicode__(self):
         return self.user.username

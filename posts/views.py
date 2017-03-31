@@ -25,12 +25,16 @@ from rest_framework.authentication import TokenAuthentication
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
-def like_post(request, pid, ra, userpid):
+def like_post(request, pid, ra, owner_id):
+    """
+    https://themoviebook.herokuapp.com/posts/like/userpid=<>/postid=<>/rating=<>/
+    GET request: adds Like
+    """
     try:
-        u = request.user # user who is logged
-        post_owner = UserProfile.objects.get(pk=userpid)  # userprofile whose post it is
-        p = post_owner.post.get(pk=pid)  # whose post it is
-        p.like(u.profile, ra)
+        profile = request.user.profile
+        post_owner = UserProfile.objects.get(pk=owner_id)
+        post = post_owner.post.get(pk=pid)
+        post.like(profile, ra)
         return JsonResponse({'detail': 'successful'}, safe=False, status=status.HTTP_200_OK)
     except Exception:
         return JsonResponse({'detail': 'failed'}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -40,12 +44,16 @@ def like_post(request, pid, ra, userpid):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
-def comment_post(request, pid, co, userpid):
+def comment_post(request, pid, co, owner_id):
+    """
+    https://themoviebook.herokuapp.com/posts/comment/userpid=<>/postid=<>/rating=<>/
+    GET request: Adds comment
+    """
     try:
-        u = request.user
-        post_owner = UserProfile.objects.get(pk=userpid)
-        p = post_owner.post.get(pk=pid)
-        p.comment(u.profile, co)
+        profile = request.user.profile
+        post_owner = UserProfile.objects.get(pk=owner_id)
+        post = post_owner.post.get(pk=pid)
+        post.comment(profile, co)
         return JsonResponse({'detail': 'successful'}, safe=False, status=status.HTTP_200_OK)
     except Exception:
         return JsonResponse({'detail': 'failed'}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
