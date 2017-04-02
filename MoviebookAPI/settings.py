@@ -96,6 +96,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Setting up for HTTPS
+
+# SECURE_SSL_REDIRECT = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Setting up AWS S3 cloud storage
 
 # HTTP headers in turn will tell browsers that they can cache these files for a very long time.
