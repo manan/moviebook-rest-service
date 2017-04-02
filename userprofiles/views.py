@@ -1,5 +1,8 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -311,7 +314,7 @@ class SearchProfileByUsername(generics.RetrieveAPIView):
 
 
 # ['GET']
-class SelfUserDetails(generics.RetrieveAPIView):
+class SelfUser(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/users/fetchdetails/
     GET: returns authenticated user object, serialized
@@ -328,7 +331,7 @@ class SelfUserDetails(generics.RetrieveAPIView):
 
 
 # ['GET']
-class SelfProfileDetails(generics.RetrieveAPIView):
+class SelfProfile(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/fetchdetails/
     GET: returns authenticated UserProfile object, serialized
@@ -381,6 +384,35 @@ class AddProfile(generics.CreateAPIView):
         permissions.IsAuthenticated,
         IsUserOfProfile,
     ]
+
+
+class SignUp(APIView):
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    def post(self, request):
+        # Checking for validity
+        errors = dict()
+        try:
+            validate_email(self.request.data['email'])
+        except ValidationError as e:
+            errors['email'] = ["Enter a valid email address."]
+        if User.objects.filter(username=self.request.data['username']).exists():
+            errors["username"] = ["A user with that username already exists."]
+        if 'email' in errors.keys() or 'username' in errors.keys():
+            return Response(data=errors, status=400)
+        # Can move forward with signing up
+
+        u = User(username=self.request.data['username'],
+                 email=self.request.data['email'],
+                 first_name=self.request.data['first_name'],
+                 last_name=self.request.data['last_name'])
+        u.set_password(self.request.data['password'])
+        u.save()
+        user_profile = UserProfile(id=u.id, user=u, gender=self.request.data['gender'], birth_date='1900-01-01')
+        user_profile.save()
+        return Response(data=RegistrationSerializer(u).data, status=200)
 
 
 # ['GET']

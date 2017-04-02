@@ -8,12 +8,13 @@ urlpatterns = [
     url('^profiles/$', views.ProfileList.as_view(), name='ProfileList'),
 
     # ADD USER/PROFILE/
-    url('^users/add/$', views.AddUser.as_view()),
-    url('^profiles/add/$', views.AddProfile.as_view()),
+    #  url('^users/add/$', views.AddUser.as_view()),
+    #  url('^profiles/add/$', views.AddProfile.as_view()),
+    url('^signup/$', views.SignUp.as_view()),
 
     # GET USER DETAILS
-    url(r'^users/fetchdetails/$', views.SelfUserDetails.as_view()),
-    url(r'^profiles/fetchdetails/$', views.SelfProfileDetails.as_view()),
+    url(r'^users/fetchdetails/$', views.SelfUser.as_view()),
+    url(r'^profiles/fetchdetails/$', views.SelfProfile.as_view()),
 
     # PROFILE PICTURES
     url(r'^profilepicture/upload/$', views.ProfilePictureUpload.as_view()),

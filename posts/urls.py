@@ -9,8 +9,8 @@ urlpatterns = [
     url('^add/$', views.AddPost.as_view()),
 
     # Add like and comment
-    url('^like/profile=(?<owner_id>.+)/postid=(?P<pid>.+)/rating=(?P<ra>.+)/$', views.like_post),
-    url('^comment/profile=(?<owner_id>.+)/postid=(?P<pid>.+)/comment=(?P<co>.+)/$', views.comment_post),
+    url('^like/profile=(?P<owner_id>.+)/postid=(?P<pid>.+)/rating=(?P<ra>.+)/$', views.like_post),
+    url('^comment/profile=(?P<owner_id>.+)/postid=(?P<pid>.+)/comment=(?P<co>.+)/$', views.comment_post),
 
     # SEARCH POSTS
     url(r'^search/username=(?P<username>.+)/$', views.PostsByUsername.as_view()),
