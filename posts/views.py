@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.views import APIView
 
 from .models import Post
 from userprofiles.models import UserProfile
@@ -221,10 +220,8 @@ class AddPost(generics.CreateAPIView):
     POST request body: {"owner":<userpid>, "movie_title":<bio>, "imdb_id":"<imdbid>", "caption":"<cap>"}
     adds post (with owner being the userp specified) to the db
 
-    Required Keys for POST: user, imdb_id
+    Required Keys for POST: owner, imdb_id
 
-    On missing imdb_id field: {"imdb_id":["This field is required."]}
-    On missing owner field: {"owner":["This field is required."]}
     If Post.owner != self.request.user, permission denied
     """
     model = Post
@@ -239,10 +236,10 @@ class AddPost(generics.CreateAPIView):
 # ['GET']
 class PostList(generics.ListAPIView):
     """
+    Admin only
+
     https://themoviebook.herokuapp.com/posts/
     GET request fetches all the posts of the all the users in the db
-
-    Authentication: Restricted to admin users only
     """
     model = Post
     queryset = Post.objects.all().order_by('id')
