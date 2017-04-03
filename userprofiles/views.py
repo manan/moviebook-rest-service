@@ -5,7 +5,6 @@ from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 
 from .models import UserProfile
 
