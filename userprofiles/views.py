@@ -56,6 +56,7 @@ class ProfilePictureUpload(APIView):
     ]
 
     def post(self, request):
+        #  Check if FILES contains key
         file_obj = request.FILES['file']
         user_profile = self.request.user.profile
         user_profile.profile_picture = file_obj
