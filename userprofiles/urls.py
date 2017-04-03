@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from . import views
-from rest_framework.authtoken import views as view
+from rest_framework.authtoken import views as v
 
 urlpatterns = [
     # ADMIN PRIVILEGES
@@ -8,8 +8,8 @@ urlpatterns = [
     url('^profiles/$', views.ProfileList.as_view(), name='ProfileList'),
 
     # ADD USER/PROFILE/
-    #  url('^users/add/$', views.AddUser.as_view()),
-    #  url('^profiles/add/$', views.AddProfile.as_view()),
+    #  url('^users/add/$', views.AddUser.as_view()),  # DEPRECATED
+    #  url('^profiles/add/$', views.AddProfile.as_view()),  # DEPRECATED
     url('^signup/$', views.SignUp.as_view()),
 
     # GET USER DETAILS
@@ -25,16 +25,16 @@ urlpatterns = [
     url(r'^profiles/search/userpids=(?P<ids>.+)/$', views.ProfilesByIDs.as_view()),
     url(r'^profiles/search/username=(?P<username>\w+)/$', views.SearchProfileByUsername.as_view()),
 
-    # FOLLOW/UNFOLLOW/BLOCK/UNBLOCK USERS # Don't use for production server
-    url(r'^profiles/follow/userpid=(?P<userpid>\w+)/$', views.follow_user),
-    url(r'^profiles/unfollow/userpid=(?P<userpid>\w+)/$', views.unblock_user),
-    url(r'^profiles/block/userpid=(?P<userpid>\w+)/$', views.block_user),
-    url(r'^profiles/unblock/userpid=(?P<userpid>\w+)/$', views.unblock_user),
+    # FOLLOW/UNFOLLOW/BLOCK/UNBLOCK USERS
+    #  url(r'^profiles/follow/userpid=(?P<user_pid>\w+)/$', views.follow_user), # DEPRECATED
+    #  url(r'^profiles/unfollow/userpid=(?P<user_pid>\w+)/$', views.unblock_user), # DEPRECATED
+    #  url(r'^profiles/block/userpid=(?P<user_pid>\w+)/$', views.block_user), # DEPRECATED
+    #  url(r'^profiles/unblock/userpid=(?P<user_pid>\w+)/$', views.unblock_user), # DEPRECATED
 
     # UPDATE USERS/PROFILES/
     url(r'^profiles/update/$', views.UpdateProfile.as_view()),
     url(r'^users/update/$', views.UpdateUser.as_view()),
 
     # SPECIAL PURPOSE
-    url(r'^token-auth/$', view.obtain_auth_token),
+    url(r'^token-auth/$', v.obtain_auth_token),
 ]
