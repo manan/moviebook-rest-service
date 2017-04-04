@@ -5,6 +5,7 @@ from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from .models import UserProfile
 
@@ -21,12 +22,11 @@ from rest_framework.decorators import authentication_classes
 from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework import generics, permissions
-from rest_framework.authentication import TokenAuthentication
 # Create your views here.
 
 
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
 def profile_picture_download(request, username):
     if request.user.profile.is_blocked_by(username):
@@ -49,7 +49,7 @@ class ProfilePictureUpload(APIView):
     To upload a profile picture for authenticated user
     """
     parser_classes = (FormParser, MultiPartParser)
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -73,7 +73,7 @@ class UpdateUser(generics.UpdateAPIView):
     """
     model = User
     serializer_class = RegistrationSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -99,7 +99,7 @@ class UpdateProfile(generics.UpdateAPIView):
     """
     model = UserProfile
     serializer_class = UserProfileUpdateSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
         IsUserOfProfile,
@@ -126,7 +126,7 @@ class UpdateProfile(generics.UpdateAPIView):
 
 
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def unfollow_user(request, user_pid):
     """
@@ -145,7 +145,7 @@ def unfollow_user(request, user_pid):
 
 
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def follow_user(request, user_pid):
     """
@@ -164,7 +164,7 @@ def follow_user(request, user_pid):
 
 
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def unblock_user(request, user_pid):
     """
@@ -183,7 +183,7 @@ def unblock_user(request, user_pid):
 
 
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
 def block_user(request, user_pid):
     """
@@ -214,7 +214,7 @@ class ProfilesByIDs(generics.ListAPIView):
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -246,7 +246,7 @@ class SearchProfiles(generics.ListAPIView):
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -286,7 +286,7 @@ class SearchProfileByUsername(generics.RetrieveAPIView):
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -305,7 +305,7 @@ class SelfUser(generics.RetrieveAPIView):
     """
     model = User
     serializer_class = RegistrationSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -322,7 +322,7 @@ class SelfProfile(generics.RetrieveAPIView):
     """
     model = UserProfile
     serializer_class = UserProfileSelfReadSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -364,7 +364,7 @@ class AddProfile(generics.CreateAPIView):
     """
     model = UserProfile
     serializer_class = UserProfileCreateSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
         IsUserOfProfile,
@@ -420,10 +420,14 @@ class UserList(generics.ListAPIView):
     model = User
     queryset = User.objects.all().order_by('id')
     serializer_class = RegistrationSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAdminUser,
     ]
+
+    def get_queryset(self):
+        print(self.request.user)
+        return User.objects.all().order_by('id')
 
 
 # ['GET']
@@ -436,7 +440,7 @@ class ProfileList(generics.ListAPIView):
     """
     model = UserProfile
     queryset = UserProfile.objects.all().order_by('id')
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAdminUser,
     ]

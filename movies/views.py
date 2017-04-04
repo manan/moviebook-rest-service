@@ -1,8 +1,8 @@
 # from django.shortcuts import render
 from rest_framework import permissions
-from rest_framework.authentication import TokenAuthentication
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from .serializers import MovieReadSerializer, MovieWriteExtendedSerializer, MovieWriteSimpleSerializer
+from .serializers import MovieReadSerializer, MovieWriteSimpleSerializer
 from .serializers import GenreSerializer, PersonalitySerializer
 from .models import Movie, Genre, Personality
 
@@ -20,7 +20,7 @@ class AddMovie(generics.CreateAPIView):
     """
     model = Movie
     serializer_class = MovieWriteSimpleSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -34,7 +34,7 @@ class MoviesList(generics.ListAPIView):
     model = Movie
     queryset = Movie.objects.all()
     serializer_class = MovieReadSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (
         permissions.IsAdminUser,
     )
@@ -48,7 +48,7 @@ class GenreList(generics.ListAPIView):
     model = Genre
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (
         permissions.IsAdminUser,
     )
@@ -62,7 +62,7 @@ class PersonalityList(generics.ListAPIView):
     model = Personality
     queryset = Personality.objects.all()
     serializer_class = PersonalitySerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (
         permissions.IsAdminUser,
     )

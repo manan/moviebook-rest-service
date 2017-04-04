@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from .models import Post
 from userprofiles.models import UserProfile
@@ -20,7 +21,7 @@ from rest_framework.authentication import TokenAuthentication
 
 @csrf_exempt
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
 def like_post(request, pid, ra, owner_id):
     """
@@ -39,7 +40,7 @@ def like_post(request, pid, ra, owner_id):
 
 @csrf_exempt
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
 def comment_post(request, pid, co, owner_id):
     """
@@ -66,7 +67,7 @@ class NewsFeed(generics.ListAPIView):
     """
     model = Post
     serializer_class = PostSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated
     ]
@@ -118,7 +119,7 @@ class UpdatePost(generics.UpdateAPIView):
     model = Post
     serializer_class = PostSerializer
     lookup_field = 'pk'
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
         IsOwner
@@ -141,7 +142,7 @@ class PostsByUserPId(generics.ListAPIView):
     """
     model = Post
     serializer_class = PostSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -167,7 +168,7 @@ class PostsByUsername(generics.ListAPIView):
     """
     model = Post
     serializer_class = PostSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -192,7 +193,7 @@ class PostsByPostIDs(generics.ListAPIView):
     """
     model = Post
     serializer_class = PostSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
     ]
@@ -224,7 +225,7 @@ class AddPost(generics.CreateAPIView):
     """
     model = Post
     serializer_class = PostSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
         IsOwnerOrReadOnly,
@@ -242,7 +243,7 @@ class PostList(generics.ListAPIView):
     model = Post
     queryset = Post.objects.all().order_by('id')
     serializer_class = PostSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAdminUser,
     ]

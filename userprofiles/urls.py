@@ -1,6 +1,7 @@
 from django.conf.urls import url
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token, verify_jwt_token
+# from rest_framework.authtoken import views as v
 from . import views
-from rest_framework.authtoken import views as v
 
 urlpatterns = [
     # ADMIN PRIVILEGES
@@ -36,5 +37,8 @@ urlpatterns = [
     url(r'^users/update/$', views.UpdateUser.as_view()),
 
     # SPECIAL PURPOSE
-    url(r'^token-auth/$', v.obtain_auth_token),
+    # url(r'^token-auth/$', v.obtain_auth_token),  # DEPRECATED
+    url(r'^token-auth/', obtain_jwt_token),
+    url(r'^token-refresh/', refresh_jwt_token),
+    url(r'^token-verify/', verify_jwt_token),
 ]
