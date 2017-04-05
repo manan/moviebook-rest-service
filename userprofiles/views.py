@@ -1,13 +1,12 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from ratelimit.decorators import ratelimit
-from ratelimit.mixins import RatelimitMixin
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
@@ -389,7 +388,7 @@ class SignUp(APIView):
 
     Required Keys for POST: username, password, first_name, last_name, email, gender
     """
-    throttle_classes = [AnonRateThrottle,]
+    # throttle_classes = [AnonRateThrottle,]
     permission_classes = [
         permissions.AllowAny,
     ]
@@ -400,10 +399,17 @@ class SignUp(APIView):
         try:
             validate_email(self.request.data['email'])
         except ValidationError as e:
-            errors['email'] = ["Enter a valid email address."]
+            errors['email'] = e
+        try:
+            validate_password(self.request.data['password'], user=User(username=self.request.data['username'],
+                                                                       email=self.request.data['email'],
+                                                                       first_name=self.request.data['first_name'],
+                                                                       last_name=self.request.data['last_name']))
+        except ValidationError as e:
+            errors['password'] = e
         if User.objects.filter(username=self.request.data['username']).exists():
             errors["username"] = ["A user with that username already exists."]
-        if 'email' in errors.keys() or 'username' in errors.keys():
+        if 'email' in errors.keys() or 'username' in errors.keys() or 'password' in errors.keys():
             return Response(data=errors, status=400)
         # Can move forward with signing up
 
@@ -412,6 +418,7 @@ class SignUp(APIView):
                  first_name=self.request.data['first_name'],
                  last_name=self.request.data['last_name'])
         u.set_password(self.request.data['password'])
+        u.is_active = False
         u.save()
         user_profile = UserProfile(id=u.id, user=u, gender=self.request.data['gender'], birth_date='1900-01-01')
         user_profile.save()
@@ -419,7 +426,7 @@ class SignUp(APIView):
 
 
 # ['GET']
-class UserList(RatelimitMixin, generics.ListAPIView):
+class UserList(generics.ListAPIView):
     """
     ADMIN ONLY
 
@@ -434,14 +441,14 @@ class UserList(RatelimitMixin, generics.ListAPIView):
     model = User
     queryset = User.objects.all().order_by('id')
     serializer_class = RegistrationSerializer
-    authentication_classes = (JSONWebTokenAuthentication,)
-    permission_classes = [
-        permissions.IsAdminUser,
-    ]
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    # permission_classes = [
+    #     permissions.IsAdminUser,
+    # ]
 
 
 # ['GET']
-class ProfileList(RatelimitMixin, generics.ListAPIView):
+class ProfileList(generics.ListAPIView):
     """
     ADMIN ONLY
 
@@ -456,7 +463,7 @@ class ProfileList(RatelimitMixin, generics.ListAPIView):
     model = UserProfile
     queryset = UserProfile.objects.all().order_by('id')
     serializer_class = UserProfileReadSerializer
-    authentication_classes = (JSONWebTokenAuthentication,)
-    permission_classes = [
-        permissions.IsAdminUser,
-    ]
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    # permission_classes = [
+    #     permissions.IsAdminUser,
+    # ]
