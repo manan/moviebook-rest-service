@@ -425,6 +425,11 @@ class UserList(RatelimitMixin, generics.ListAPIView):
     https://themoviebook.herokuapp.com/users/
     Gets auth.User of all users in db
     """
+    ratelimit_key = 'ip'
+    ratelimit_rate = '1/15s'
+    ratelimit_block = True
+    ratelimit_method = 'GET'
+
     model = User
     queryset = User.objects.all().order_by('id')
     serializer_class = RegistrationSerializer
@@ -435,13 +440,18 @@ class UserList(RatelimitMixin, generics.ListAPIView):
 
 
 # ['GET']
-class ProfileList(generics.ListAPIView):
+class ProfileList(RatelimitMixin, generics.ListAPIView):
     """
     ADMIN ONLY
 
     https://themoviebook.herokuapp.com/profiles/
     Gets UserProfile of the all users in db
     """
+    ratelimit_key = 'ip'
+    ratelimit_rate = '1/15s'
+    ratelimit_block = True
+    ratelimit_method = 'GET'
+
     model = UserProfile
     queryset = UserProfile.objects.all().order_by('id')
     serializer_class = UserProfileReadSerializer
