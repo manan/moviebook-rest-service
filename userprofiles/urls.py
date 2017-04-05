@@ -7,11 +7,15 @@ urlpatterns = [
     # ADMIN PRIVILEGES
     url('^users/$', views.UserList.as_view(), name='UserList'),
     url('^profiles/$', views.ProfileList.as_view(), name='ProfileList'),
+    url(r'^activation-keys/$', views.ActivationKeyList.as_view()),
 
     # ADD USER/PROFILE/
     #  url('^users/add/$', views.AddUser.as_view()),  # DEPRECATED
     #  url('^profiles/add/$', views.AddProfile.as_view()),  # DEPRECATED
     url('^signup/$', views.SignUp.as_view()),
+
+    # USER ACTIVATION
+    url(r'^users/activate/$', views.ActivateUser.as_view()),
 
     # GET USER DETAILS
     url(r'^users/self/$', views.SelfUser.as_view()),

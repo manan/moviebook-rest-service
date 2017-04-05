@@ -1,6 +1,12 @@
 from rest_framework import serializers
-from .models import UserProfile
+from .models import UserProfile, Activation
 from django.contrib.auth.models import User
+
+
+class ActivationReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activation
+        fields = ('user', 'key', 'expires', 'id')
 
 
 class UserProfileReadSerializer(serializers.ModelSerializer):

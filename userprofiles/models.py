@@ -165,6 +165,11 @@ class UserProfile(models.Model):
         return True
 
 
+class Activation(models.Model):
+    user = models.OneToOneField('auth.User', related_name='activation_key')
+    key = models.CharField(max_length=6)
+    expires = models.DateTimeField()
+
 # @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 # def create_auth_token(sender, instance=None, created=False, **kwargs):
 #     if created:

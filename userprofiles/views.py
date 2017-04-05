@@ -1,3 +1,5 @@
+import datetime
+from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
@@ -6,13 +8,14 @@ from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils.crypto import get_random_string
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from .models import UserProfile
+from .models import UserProfile, Activation
 
-from .serializers import UserProfileReadSerializer, UserProfileCreateSerializer
+from .serializers import UserProfileReadSerializer, UserProfileCreateSerializer, ActivationReadSerializer
 from .serializers import UserProfileUpdateSerializer, UserProfileSelfReadSerializer
 from .serializers import RegistrationSerializer
 
@@ -380,6 +383,29 @@ class AddUser(generics.CreateAPIView):
     ]
 
 
+class ActivateUser(APIView):
+    # throttle_classes = [AnonRateThrottle,]
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    def post(self, request):
+        try:
+            key = self.request.data['key']
+            user_id = self.request.data['user']
+            user = User.objects.get(pk=user_id)
+            if datetime.datetime.now() < user.activation_key.expires and key == user.activation_key.key:
+                activation = user.activation_key
+                activation.delete()
+                user.is_active = True
+                user.save()
+                return Response(status=204)
+            else:
+                return Response(status=401)
+        except Exception:
+            return Response(status=401)
+
+
 # ['POST']
 class SignUp(APIView):
     """
@@ -422,7 +448,29 @@ class SignUp(APIView):
         u.save()
         user_profile = UserProfile(id=u.id, user=u, gender=self.request.data['gender'], birth_date='1900-01-01')
         user_profile.save()
+        chars = '1234567890'
+        activation = Activation(user=u,
+                                key=get_random_string(6, chars),
+                                expires=datetime.datetime.now() + datetime.timedelta(hours=24))
+        activation.save()
         return Response(data=RegistrationSerializer(u).data, status=200)
+
+
+# ['GET']
+class ActivationKeyList(generics.ListAPIView):
+    """
+    ADMIN ONLY
+
+    https://themoviebook.herokuapp.com/profiles/
+    Gets UserProfile of the all users in db
+    """
+    model = Activation
+    queryset = Activation.objects.all().order_by('id')
+    serializer_class = ActivationReadSerializer
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    # permission_classes = [
+    #     permissions.IsAdminUser,
+    # ]
 
 
 # ['GET']
