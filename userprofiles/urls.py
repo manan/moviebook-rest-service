@@ -18,8 +18,8 @@ urlpatterns = [
     url(r'^profiles/self/$', views.SelfProfile.as_view()),
 
     # PROFILE PICTURES
-    url(r'^profilepicture/upload/$', views.ProfilePictureUpload.as_view()),
-    url(r'^profilepicture/(?P<username>\w+)/$', views.profile_picture_download),
+    url(r'^profiles/profilepicture/upload/$', views.ProfilePictureUpload.as_view()),
+    url(r'^profiles/profilepicture/(?P<username>\w+)/$', views.profile_picture_download),
 
     # SEARCH USERPROFILES
     url(r'^profiles/search/name=(?P<name>.+)/$', views.SearchProfiles.as_view()),
@@ -37,7 +37,7 @@ urlpatterns = [
     url(r'^users/update/$', views.UpdateUser.as_view()),
 
     # SPECIAL PURPOSE
-    # url(r'^token-auth/$', v.obtain_auth_token),  # DEPRECATED
+    # url(r'^token-auth/$', v.obtain_auth_token),  # DEPRECATED # TokenAuthentication removed
     url(r'^token-auth/', obtain_jwt_token),
     url(r'^token-refresh/', refresh_jwt_token),
     url(r'^token-verify/', verify_jwt_token),
