@@ -22,7 +22,7 @@ class UserProfile(models.Model):
     profile_picture = models.FileField(upload_to=upload_location, default="default-5.jpg")
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
     followings = models.ManyToManyField('self', related_name='followers', symmetrical=False)
-    blocked = models.ManyToManyField('self', related_name='blockedby', symmetrical=False)
+    blocked = models.ManyToManyField('self', related_name='blocked_by', symmetrical=False)
 
     def __unicode__(self):
         return self.user.username

@@ -31,7 +31,7 @@ def like_post(request, pid, ra, owner_id):
     try:
         profile = request.user.profile
         post_owner = UserProfile.objects.get(pk=owner_id)
-        post = post_owner.post.get(pk=pid)
+        post = post_owner.posts.get(pk=pid)
         post.like(profile, ra)
         return JsonResponse({'detail': 'successful'}, safe=False, status=status.HTTP_200_OK)
     except Exception:
@@ -50,7 +50,7 @@ def comment_post(request, pid, co, owner_id):
     try:
         profile = request.user.profile
         post_owner = UserProfile.objects.get(pk=owner_id)
-        post = post_owner.post.get(pk=pid)
+        post = post_owner.posts.get(pk=pid)
         post.comment(profile, co)
         return JsonResponse({'detail': 'successful'}, safe=False, status=status.HTTP_200_OK)
     except Exception:
@@ -76,7 +76,7 @@ class NewsFeed(generics.ListAPIView):
         people_following = self.request.user.profile.followings.all()
         newsfeed = []
         for person in people_following:
-            for post in person.post.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
+            for post in person.posts.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
                 newsfeed.append(post)
         newsfeed.sort(key=lambda x: x.upload_date, reverse=True)
         return newsfeed
@@ -103,7 +103,7 @@ class DeletePost(generics.DestroyAPIView):
     ]
 
     def get_queryset(self):
-        return self.request.user.profile.post.all()
+        return self.request.user.profile.posts.all()
 
 
 # ['PUT', 'PATCH']
@@ -126,7 +126,7 @@ class UpdatePost(generics.UpdateAPIView):
     ]
 
     def get_queryset(self):
-        return self.request.user.profile.post.all()
+        return self.request.user.profile.posts.all()
 
 
 # ['GET']
@@ -151,7 +151,7 @@ class PostsByUserPId(generics.ListAPIView):
         query_user = UserProfile.objects.get(pk=self.kwargs['userpid'])
         if self.request.user.profile.is_blocked_by(username=query_user.user.username):
             raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
-        return query_user.post.all()
+        return query_user.posts.all()
 
 
 # ['GET']
@@ -177,7 +177,7 @@ class PostsByUsername(generics.ListAPIView):
         if self.request.user.profile.is_blocked_by(username=self.kwargs['username']):
             raise Exception("The user you're trying to find has blocked you. Savage. Lmao.")
         query_user = User.objects.get(username=self.kwargs['username']).profile
-        return query_user.post.all()
+        return query_user.posts.all()
 
 
 # ['GET']

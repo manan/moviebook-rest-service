@@ -7,7 +7,7 @@ from userprofiles.models import UserProfile
 
 
 class Post(models.Model):
-    owner = models.ForeignKey(UserProfile, related_name='post')
+    owner = models.ForeignKey(UserProfile, related_name='posts')
     movie_title = models.CharField(max_length=200)
     movie_id = models.CharField(max_length=20)
     caption = models.CharField(max_length=200, blank=True, null=True)
