@@ -14,8 +14,8 @@ urlpatterns = [
     url('^signup/$', views.SignUp.as_view()),
 
     # GET USER DETAILS
-    url(r'^users/fetchdetails/$', views.SelfUser.as_view()),
-    url(r'^profiles/fetchdetails/$', views.SelfProfile.as_view()),
+    url(r'^users/self/$', views.SelfUser.as_view()),
+    url(r'^profiles/self/$', views.SelfProfile.as_view()),
 
     # PROFILE PICTURES
     url(r'^profilepicture/upload/$', views.ProfilePictureUpload.as_view()),

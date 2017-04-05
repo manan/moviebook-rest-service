@@ -5,6 +5,7 @@ from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from .models import UserProfile
@@ -25,12 +26,13 @@ from rest_framework import generics, permissions
 # Create your views here.
 
 
+@csrf_exempt()
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
 def profile_picture_download(request, username):
     if request.user.profile.is_blocked_by(username):
-        return Response({"detail": "User is blocked."}, status=400)
+        return Response({"detail": "User is blocked."}, status=403)
     try:
         image_url = User.objects.get(username=username).profile.profile_picture.url
         return render(request, "profilepicture.html", {'imageurl': image_url})
@@ -42,11 +44,10 @@ def profile_picture_download(request, username):
 class ProfilePictureUpload(APIView):
     """
     https://themoviebook.herokuapp.com/profilepicture/upload/
-    POST Request:
-    curl -i -H "Authorization: Token e0e4a26da62d55c0b017138dfd3f18b96a9fe58a" -F "file=@icon.jpg" 
-    http://127.0.0.1:8000/profilepicture/upload/
-    
-    To upload a profile picture for authenticated user
+    sets image as logged in user's profile picture
+
+    Demo Request:
+    curl -i -H "Authorization: JWT <token>" -F "file=@icon.jpg" /profilepicture/upload/
     """
     parser_classes = (FormParser, MultiPartParser)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -78,6 +79,9 @@ class UpdateUser(generics.UpdateAPIView):
         permissions.IsAuthenticated,
     ]
 
+    def get_object(self):
+        return self.request.user
+
     def perform_update(self, serializer):                                                           
         if 'password' in self.request.data:
             password = make_password(self.request.data['password'])                                 
@@ -85,24 +89,21 @@ class UpdateUser(generics.UpdateAPIView):
         else:
             serializer.save()
 
-    def get_object(self):
-        return self.request.user
-
 
 # ['PUT', 'PATCH']
 class UpdateProfile(generics.UpdateAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/update/
-    PATCH/PUT request: modifies logged-in-user
+    modifies logged-in-user
     
     Required Keys for PATCH: none except the ones you want to change
+    Required Keys for PUT:
     """
     model = UserProfile
     serializer_class = UserProfileUpdateSerializer
     authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAuthenticated,
-        IsUserOfProfile,
     ]
 
     def get_object(self):
@@ -122,7 +123,7 @@ class UpdateProfile(generics.UpdateAPIView):
             for b in self.request.data['blocked']:
                 user_profile.remove_follower(upid=b)
                 new_blocked.append(b)
-        serializer.save(followings=new_followings, blocked=new_blocked)
+        serializer.save(user=user_profile.user.id, followings=new_followings, blocked=new_blocked)
 
 
 @api_view(['GET'])
@@ -132,7 +133,7 @@ def unfollow_user(request, user_pid):
     """
     DEPRECATED
 
-    GET request: result: authenticated user unfollows user w userpid
+    GET request: logged in user unfollows user w provided user_pid
 
     Required Keys for GET: user_pid
     """
@@ -151,7 +152,7 @@ def follow_user(request, user_pid):
     """
     DEPRECATED
 
-    GET request: result: authenticated user follows user w userpid
+    GET request: logged in user follows user w provided user_pid
 
     Required Keys for GET: user_pid
     """
@@ -163,6 +164,7 @@ def follow_user(request, user_pid):
         return Response(status=500)
 
 
+@csrf_exempt()
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
@@ -170,7 +172,7 @@ def unblock_user(request, user_pid):
     """
     DEPRECATED
 
-    GET request: result: authenticated user unblocks user w userpid
+    GET request: logged in user unblocks user w provided user_pid
 
     Required Keys for GET: user_pid
     """
@@ -182,6 +184,7 @@ def unblock_user(request, user_pid):
         return Response(status=500)
 
 
+@csrf_exempt()
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
@@ -189,7 +192,7 @@ def block_user(request, user_pid):
     """
     DEPRECATED
 
-    GET request: logged-in-user blocks user w given userpid
+    GET request: logged in user blocks user w provided user_pid
 
     Required Keys for GET: user_pid
     """
@@ -205,8 +208,8 @@ def block_user(request, user_pid):
 class ProfilesByIDs(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/search/userpids=<id1>,<id2>,..<idn>/
-    GET request fetches the users with the given user ids. Set doesn't include
-    profiles that have blocked active user.
+    Gets users with the given user ids. Set doesn't include users who have blocked
+    logged in user
 
     Required Keys for GET: at least one id
 
@@ -226,7 +229,7 @@ class ProfilesByIDs(generics.ListAPIView):
         for every_id in ids:
             try:
                 user_profile = UserProfile.objects.get(pk=every_id)
-                if not self.request.user.profile.is_blocked_by(user_profile.user.username):
+                if not self.request.user.profile.is_blocked_by(upid=user_profile.id):
                     ret.add(user_profile)
             except UserProfile.DoesNotExist:
                 pass
@@ -237,10 +240,10 @@ class ProfilesByIDs(generics.ListAPIView):
 class SearchProfiles(generics.ListAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/search/name=<name>/
-    GET request fetches all the userprofiles with an approximate name match.
-        Doesn't include profiles that have blocked logged-in-user.
+    Gets all the userprofiles with an approximate name match.
+    Doesn't include profiles that have blocked logged in user.
 
-    Required Keys for GET: <name>
+    Required Keys for GET: name
 
     On no matches: []
     """
@@ -278,11 +281,12 @@ class SearchProfiles(generics.ListAPIView):
 class SearchProfileByUsername(generics.RetrieveAPIView):
     """
     https://themoviebook.herokuapp.com/profiles/search/username=<username>/
-    GET: returns models.UserProfile if found an exact match
+    Gets models.UserProfile if found an exact match
 
-    Exception raised if the logged in user is blocked by the person he is searching for
+    Exception raised if logged in user is blocked by user he is searching for
+    Exception raised if user not found
 
-    Required Keys for GET: <username>
+    Required Keys for GET: username
     """
     model = UserProfile
     serializer_class = UserProfileReadSerializer
@@ -300,8 +304,8 @@ class SearchProfileByUsername(generics.RetrieveAPIView):
 # ['GET']
 class SelfUser(generics.RetrieveAPIView):
     """
-    https://themoviebook.herokuapp.com/users/fetchdetails/
-    GET: returns models.User of person logged in
+    https://themoviebook.herokuapp.com/users/self/
+    Gets auth.User of logged in user
     """
     model = User
     serializer_class = RegistrationSerializer
@@ -317,8 +321,8 @@ class SelfUser(generics.RetrieveAPIView):
 # ['GET']
 class SelfProfile(generics.RetrieveAPIView):
     """
-    https://themoviebook.herokuapp.com/profiles/fetchdetails/
-    GET: returns models.UserProfile of person logged in
+    https://themoviebook.herokuapp.com/profiles/self/
+    Gets models.UserProfile of logged in user
     """
     model = UserProfile
     serializer_class = UserProfileSelfReadSerializer
@@ -329,24 +333,6 @@ class SelfProfile(generics.RetrieveAPIView):
         
     def get_object(self):
         return self.request.user.profile
-
-
-# ['POST']
-class AddUser(generics.CreateAPIView):
-    """
-    DEPRECATED
-
-    https://themoviebook.herokuapp.com/users/add/
-    POST request body {"username":<>, "password":<>, "email":<>, "first_name":<>, "last_name":<>}
-    adds user to the db
-
-    Required Keys for POST: username, password, email, first_name, last_name
-    """
-    model = User
-    serializer_class = RegistrationSerializer
-    permission_classes = [
-        permissions.AllowAny,
-    ]
 
 
 # ['POST']
@@ -365,8 +351,28 @@ class AddProfile(generics.CreateAPIView):
     serializer_class = UserProfileCreateSerializer
     authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
-        permissions.IsAuthenticated,
-        IsUserOfProfile,
+        permissions.IsAdminUser,
+        # permissions.IsAuthenticated,
+        # IsUserOfProfile,
+    ]
+
+
+# ['POST']
+class AddUser(generics.CreateAPIView):
+    """
+    DEPRECATED
+
+    https://themoviebook.herokuapp.com/users/add/
+    POST request body {"username":<>, "password":<>, "email":<>, "first_name":<>, "last_name":<>}
+    adds user to the db
+
+    Required Keys for POST: username, password, email, first_name, last_name
+    """
+    model = User
+    serializer_class = RegistrationSerializer
+    permission_classes = [
+        permissions.IsAdminUser,
+        # permissions.AllowAny,
     ]
 
 
