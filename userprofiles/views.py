@@ -27,7 +27,7 @@ from rest_framework import generics, permissions
 # Create your views here.
 
 
-@csrf_exempt()
+@csrf_exempt
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated,))
@@ -127,6 +127,7 @@ class UpdateProfile(generics.UpdateAPIView):
         serializer.save(user=user_profile.user.id, followings=new_followings, blocked=new_blocked)
 
 
+@csrf_exempt
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
@@ -146,6 +147,7 @@ def unfollow_user(request, user_pid):
         return Response(status=500)
 
 
+@csrf_exempt
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
@@ -165,7 +167,7 @@ def follow_user(request, user_pid):
         return Response(status=500)
 
 
-@csrf_exempt()
+@csrf_exempt
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
@@ -185,7 +187,7 @@ def unblock_user(request, user_pid):
         return Response(status=500)
 
 
-@csrf_exempt()
+@csrf_exempt
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
 @permission_classes((permissions.IsAuthenticated, IsUserOfProfile))
