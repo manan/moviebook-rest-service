@@ -14,3 +14,12 @@ class IsUserOfProfile(permissions.BasePermission):
         if user_profile_user_id is not None:
             return user_profile_user_id == user_id
         return False
+
+
+class IsActiveUser(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+       return request.user.is_active
+
+    def has_permission(self, request, view):
+        return request.user.is_active
