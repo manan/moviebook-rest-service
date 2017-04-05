@@ -355,8 +355,7 @@ class AddProfile(generics.CreateAPIView):
     DEPRECATED
 
     https://themoviebook.herokuapp.com/profiles/add/
-    POST request body: {"user":<userid>, "bio":<bio>, "birth_date":"<YYYY-MM-DD>"}
-    adds profile to db
+    adds UserProfile to db
 
     Required Keys for POST: user
 
@@ -413,9 +412,7 @@ class UserList(generics.ListAPIView):
     ADMIN ONLY
 
     https://themoviebook.herokuapp.com/users/
-    GET request gets all the users in the db
-    
-    Authentication: Restricted to admin users only
+    Gets auth.User of all users in db
     """
     model = User
     queryset = User.objects.all().order_by('id')
@@ -425,10 +422,6 @@ class UserList(generics.ListAPIView):
         permissions.IsAdminUser,
     ]
 
-    def get_queryset(self):
-        print(self.request.user)
-        return User.objects.all().order_by('id')
-
 
 # ['GET']
 class ProfileList(generics.ListAPIView):
@@ -436,14 +429,12 @@ class ProfileList(generics.ListAPIView):
     ADMIN ONLY
 
     https://themoviebook.herokuapp.com/profiles/
-    GET request gets the userprofiles of the all the users in the db
+    Gets UserProfile of the all users in db
     """
     model = UserProfile
     queryset = UserProfile.objects.all().order_by('id')
+    serializer_class = UserProfileReadSerializer
     authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = [
         permissions.IsAdminUser,
     ]
-    
-    def get_serializer_class(self):
-        return UserProfileSelfReadSerializer
