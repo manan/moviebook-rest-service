@@ -97,8 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# SET UP FOR JSONWebToken Authentication
+# SET UP FOR JSONWebToken AUTH AND THROTTLE CLASSES AND RATES
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -109,6 +108,14 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/day',
+        'user': '1000/day'
+    }
 }
 
 JWT_AUTH = {

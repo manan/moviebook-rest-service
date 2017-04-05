@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from ratelimit.decorators import ratelimit
 from ratelimit.mixins import RatelimitMixin
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from .models import UserProfile
@@ -388,11 +389,11 @@ class SignUp(APIView):
 
     Required Keys for POST: username, password, first_name, last_name, email, gender
     """
+    throttle_classes = [AnonRateThrottle,]
     permission_classes = [
         permissions.AllowAny,
     ]
 
-    @ratelimit(key='ip', rate='5/d', block=True)
     def post(self, request):
         # Checking for validity
         errors = dict()
