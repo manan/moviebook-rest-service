@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from ratelimit.decorators import ratelimit
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from .models import UserProfile
@@ -388,6 +389,7 @@ class SignUp(APIView):
         permissions.AllowAny,
     ]
 
+    @ratelimit(key='ip', rate='2/m')
     def post(self, request):
         # Checking for validity
         errors = dict()
