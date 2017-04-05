@@ -392,7 +392,7 @@ class SignUp(APIView):
         permissions.AllowAny,
     ]
 
-    @ratelimit(key='ip', rate='2/m', block=True)
+    @ratelimit(key='ip', rate='5/d', block=True)
     def post(self, request):
         # Checking for validity
         errors = dict()
@@ -426,7 +426,7 @@ class UserList(RatelimitMixin, generics.ListAPIView):
     Gets auth.User of all users in db
     """
     ratelimit_key = 'ip'
-    ratelimit_rate = '1/15s'
+    ratelimit_rate = '1/s'
     ratelimit_block = True
     ratelimit_method = 'GET'
 
@@ -448,7 +448,7 @@ class ProfileList(RatelimitMixin, generics.ListAPIView):
     Gets UserProfile of the all users in db
     """
     ratelimit_key = 'ip'
-    ratelimit_rate = '1/15s'
+    ratelimit_rate = '1/s'
     ratelimit_block = True
     ratelimit_method = 'GET'
 
