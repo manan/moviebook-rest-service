@@ -1,4 +1,6 @@
 import datetime
+
+from django.core.mail import send_mail
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -383,6 +385,39 @@ class AddUser(generics.CreateAPIView):
     ]
 
 
+class ResendToken(APIView):
+    # throttle_classes = [AnonRateThrottle,]
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    def post(self, request):
+        try:
+            username = self.request.data['username']
+            user = User.objects.get(username=username)
+            if user.is_active:
+                return Response(data={'detail': 'User is already active.'})
+            chars = '1234567890'
+            activation = user.activation_key
+            activation.key = get_random_string(6, chars)
+            activation.expires = datetime.datetime.now() + datetime.timedelta(minutes=2)
+            activation.save()
+            # Send mail
+            return Response(status=200)
+        except Exception:
+            return Response(status=401)
+
+
+@api_view(['GET'])
+def test_email(request):
+    send_mail(subject='Yo',
+              from_email='manan.shm@gmail.com',
+              message='Hello, World!',
+              recipient_list=['sadhana1997@gmail.com'],
+              fail_silently=False)
+    return Response(data={'detail': 'successful'}, status=200)
+
+
 class ActivateUser(APIView):
     # throttle_classes = [AnonRateThrottle,]
     permission_classes = [
@@ -394,12 +429,14 @@ class ActivateUser(APIView):
             key = self.request.data['key']
             user_id = self.request.data['user']
             user = User.objects.get(pk=user_id)
-            if datetime.datetime.now() < user.activation_key.expires and key == user.activation_key.key:
+            if datetime.datetime.now() > user.activation_key.expires:
+                return Response(data={'detail': "Activation key has expired."}, status=401)
+            if key == user.activation_key.key:
                 activation = user.activation_key
                 activation.delete()
                 user.is_active = True
                 user.save()
-                return Response(status=204)
+                return Response(data={'detail': "Email verified."}, status=200)
             else:
                 return Response(status=401)
         except Exception:
@@ -451,8 +488,9 @@ class SignUp(APIView):
         chars = '1234567890'
         activation = Activation(user=u,
                                 key=get_random_string(6, chars),
-                                expires=datetime.datetime.now() + datetime.timedelta(hours=24))
+                                expires=datetime.datetime.now() + datetime.timedelta(minutes=2))
         activation.save()
+        # Send email
         return Response(data=RegistrationSerializer(u).data, status=200)
 
 
