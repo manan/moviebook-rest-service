@@ -410,10 +410,10 @@ class ResendToken(APIView):
 
 @api_view(['GET'])
 def test_email(request):
-    send_mail(subject='Yo',
-              from_email='manan.shm@gmail.com',
+    send_mail(subject='Welcome!',
+              from_email='Moviebook Inc <mehtamanan@moviebookinc.com>',
               message='Hello, World!',
-              recipient_list=['sadhana1997@gmail.com'],
+              recipient_list=['mehtamanan@icloud.com'],
               fail_silently=False)
     return Response(data={'detail': 'successful'}, status=200)
 
