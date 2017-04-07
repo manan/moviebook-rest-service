@@ -41,7 +41,7 @@ def like_post(request, pid, ra, owner_id):
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes((JSONWebTokenAuthentication,))
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAuthenticated, ))
 def comment_post(request, pid, co, owner_id):
     """
     https://themoviebook.herokuapp.com/posts/comment/userpid=<>/postid=<>/rating=<>/

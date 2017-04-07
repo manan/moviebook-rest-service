@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -167,7 +168,7 @@ class UserProfile(models.Model):
 
 class Activation(models.Model):
     user = models.OneToOneField('auth.User', related_name='activation_key')
-    key = models.CharField(max_length=6)
+    key = models.CharField(max_length=settings.ACTIVATION_KEY_LENGTH)
     expires = models.DateTimeField()
 
 # @receiver(post_save, sender=settings.AUTH_USER_MODEL)

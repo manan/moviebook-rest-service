@@ -1,7 +1,7 @@
 import datetime
 
+from django.conf import settings
 from django.core.mail import send_mail
-from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
@@ -385,39 +385,6 @@ class AddUser(generics.CreateAPIView):
     ]
 
 
-class ResendToken(APIView):
-    # throttle_classes = [AnonRateThrottle,]
-    permission_classes = [
-        permissions.AllowAny,
-    ]
-
-    def post(self, request):
-        try:
-            username = self.request.data['username']
-            user = User.objects.get(username=username)
-            if user.is_active:
-                return Response(data={'detail': 'User is already active.'})
-            chars = '1234567890'
-            activation = user.activation_key
-            activation.key = get_random_string(6, chars)
-            activation.expires = datetime.datetime.now() + datetime.timedelta(minutes=2)
-            activation.save()
-            # Send mail
-            return Response(status=200)
-        except Exception:
-            return Response(status=401)
-
-
-@api_view(['GET'])
-def test_email(request):
-    send_mail(subject='Welcome!',
-              from_email='Moviebook Inc <mehtamanan@moviebookinc.com>',
-              message='Hello, World!',
-              recipient_list=['mehtamanan@icloud.com'],
-              fail_silently=False)
-    return Response(data={'detail': 'successful'}, status=200)
-
-
 class ActivateUser(APIView):
     # throttle_classes = [AnonRateThrottle,]
     permission_classes = [
@@ -426,8 +393,6 @@ class ActivateUser(APIView):
 
     def get(self, request, user_id, key):
         try:
-            # key = self.request.data['key']
-            # user_id = self.request.data['user']
             user = User.objects.get(pk=user_id)
             if datetime.datetime.now() > user.activation_key.expires:
                 return Response(data={'detail': "Activation key has expired."}, status=401)
@@ -443,6 +408,41 @@ class ActivateUser(APIView):
             return Response(status=401)
 
 
+class ResendActivationKey(APIView):
+    # throttle_classes = [AnonRateThrottle,]
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            if user.is_active:
+                return Response(data={'detail': 'User is already active.'})
+            activation = user.activation_key
+            activation.key = get_random_string(100)
+            activation.expires = datetime.datetime.now() + datetime.timedelta(hours=24)
+            activation.save()
+
+            # Send mail
+            message = 'Hi ' + user.first_name + ',\n\n'
+            message += "Thank you for your interest in Moviebook. To complete signing up, please " \
+                       "click on the link below and join the Movie World!"
+            message += "\n\n"
+            message += "https://themoviebook.herokuapp.com/users/activate/" + str(user.id) \
+                       + "/key=" + activation.key + "/\n\n"
+            message += "Happy sharing!"
+
+            send_mail(subject='Welcome to MovieBook!',
+                      from_email='Moviebook Inc <mehtamanan@moviebookinc.com>',
+                      message=message,
+                      recipient_list=[user.email],
+                      fail_silently=False)
+            return Response(status=200)
+        except Exception:
+            return Response(status=401)
+
+
 # ['POST']
 class SignUp(APIView):
     """
@@ -451,13 +451,13 @@ class SignUp(APIView):
 
     Required Keys for POST: username, password, first_name, last_name, email, gender
     """
-    # throttle_classes = [AnonRateThrottle,]
+    # throttle_classes = [AnonRateThrottle]
     permission_classes = [
         permissions.AllowAny,
     ]
 
     def post(self, request):
-        # Checking for validity
+        # Checking for validity # Todo unique emil config
         errors = dict()
         try:
             validate_email(self.request.data['email'])
@@ -474,8 +474,8 @@ class SignUp(APIView):
             errors["username"] = ["A user with that username already exists."]
         if 'email' in errors.keys() or 'username' in errors.keys() or 'password' in errors.keys():
             return Response(data=errors, status=400)
-        # Can move forward with signing up
 
+        # Can move forward with signing up
         u = User(username=self.request.data['username'],
                  email=self.request.data['email'],
                  first_name=self.request.data['first_name'],
@@ -485,18 +485,25 @@ class SignUp(APIView):
         u.save()
         user_profile = UserProfile(id=u.id, user=u, gender=self.request.data['gender'], birth_date='1900-01-01')
         user_profile.save()
-        chars = '1234567890'
+
+        # Activation key made
         activation = Activation(user=u,
-                                key=get_random_string(6, chars),
-                                expires=datetime.datetime.now() + datetime.timedelta(minutes=2))
+                                key=get_random_string(settings.ACTIVATION_KEY_LENGTH),
+                                expires=datetime.datetime.now() + datetime.timedelta(hours=24))
         activation.save()
-        message = 'Hi ' + u.first_name + ',\n\n'
-        message += "Thank you for signing up for Moviebook. Please click on the link below to activate your account :)"
-        message += "\n\n"
+
         # Send email
-        send_mail(subject='Welcome!',
+        message = 'Hi ' + u.first_name + ',\n\n'
+        message += "Thank you for your interest in Moviebook. To complete signing up, please " \
+                   "click on the link below and join the Movie World!"
+        message += "\n\n"
+        message += "https://themoviebook.herokuapp.com/users/activate/" + str(u.id) \
+                   + "/key=" + activation.key + "/\n\n"
+        message += "Happy sharing!"
+
+        send_mail(subject='Welcome to MovieBook!',
                   from_email='Moviebook Inc <mehtamanan@moviebookinc.com>',
-                  message='Hello, World!',
+                  message=message,
                   recipient_list=[u.email],
                   fail_silently=False)
         return Response(data=RegistrationSerializer(u).data, status=200)

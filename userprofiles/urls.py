@@ -15,7 +15,9 @@ urlpatterns = [
     url('^signup/$', views.SignUp.as_view()),
 
     # USER ACTIVATION
-    url(r'^users/activate/(?P<user_id>.+)/(?P<key>.+)/$', views.ActivateUser.as_view()),
+    # IF YOU CHANGE URL HERE, CHANGE IT IN views.SignUp and views.ResendAcivation
+    url(r'^users/activate/(?P<user_id>.+)/key=(?P<key>.+)/$', views.ActivateUser.as_view()),
+    url(r'^users/resend-activation-key/(?P<user_id>.+)/$', views.ResendActivationKey.as_view()),
 
     # GET USER DETAILS
     url(r'^users/self/$', views.SelfUser.as_view()),
@@ -45,6 +47,4 @@ urlpatterns = [
     url(r'^token-auth/', obtain_jwt_token),
     url(r'^token-refresh/', refresh_jwt_token),
     url(r'^token-verify/', verify_jwt_token),
-
-    url(r'^test/$', views.test_email),
 ]
