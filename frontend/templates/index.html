@@ -5,40 +5,52 @@
 <!--[if (gte IE 9)|!(IE)]><!--><html class="no-js" lang="en"> <!--<![endif]-->
 <head>
 
+    {% load staticfiles %}
+
    <!--- Basic Page Needs
    ================================================== -->
    <meta charset="utf-8">
 	<title>Moviebook</title>
 	<meta name="description" content="">  
 	<meta name="author" content="">
-    <meta name="google-site-verification"
-    content="<meta name="google-site-verification" content="rLLpmydeBaYDz3T5fzM4qT4OlPI8Vcd60EUONvEVHWw" />" />
 
    <!-- Mobile Specific Metas
    ================================================== -->
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
+
 	<!-- CSS
     ================================================== -->
-   <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/main.css">
-   <link rel="stylesheet" href="css/media-queries.css">         
+   <!--<link rel="stylesheet" href="css/base.css">-->
+    <!--<link rel="stylesheet" href="css/main.css">-->
+   <!--<link rel="stylesheet" href="css/media-queries.css">   -->
+
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" type = "text/css"/>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" type = "text/css"/>
+    <link rel="stylesheet" href="{% static 'css/media-queries.css' %}" type = "text/css"/>
 
    <!-- Script
    =================================================== -->
-	<script src="js/modernizr.js"></script>
+	<!--<script src="js/modernizr.js"></script>-->
+    <script src="{% static 'js/modernizr.js' %}"></script>
+    <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
+    <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery.flexslider.js' %}"></script>
+    <script src="{% static 'js/jquery.fittext.js' %}"></script>
+    <script src="{% static 'js/backstretch.js' %}"></script>
+    <script src="{% static 'js/waypoints.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 
    <!-- Favicons
 	=================================================== -->
-	<link rel="shortcut icon" href="favicon.png" >
-
+	<link rel="shortcut icon" href="https://s3.ca-central-1.amazonaws.com/moviebook/static/favicon.png" >
 </head>
 
 <body class="homepage">
 
    <div id="preloader"> 
 	   <div id="status">
-         <img src="images/loader.gif" height="60" width="60" alt="">
+         <img src="https://s3.ca-central-1.amazonaws.com/moviebook/static/loader.gif" height="60" width="60" alt="">
          <div class="loader">Loading...</div>
       </div>
    </div>
@@ -101,14 +113,15 @@
 							</div>						
 					   </li>
 
+                       <!--<li>						-->
+							<!--<div class="flex-caption">-->
+								<!--<h1 >Do you love bragging about your favourite movies? Us, too!</h1>-->
+                                <!--<p><a class="button stroke smoothscroll" href="#about">More About Us</a></p>-->
+								<!--&lt;!&ndash; <p><a class="button stroke smoothscroll" href="#portfolio">See Our Works</a></p> &ndash;&gt;-->
+							<!--</div>-->
+					   <!--</li>-->
+
 					   <!-- Slide -->
-					   <li>						
-							<div class="flex-caption">
-								<h1 >Do you love bragging about your favourite movies? Us, too!</h1>
-                                <p><a class="button stroke smoothscroll" href="#about">More About Us</a></p>
-								<!-- <p><a class="button stroke smoothscroll" href="#portfolio">See Our Works</a></p> -->
-							</div>
-					   </li>
 
 				   </ul>
 
@@ -517,7 +530,7 @@
 		               <div class="member-header">
 
 		                 	<div class="member-pic">
-									<img src="images/team/member01-k.jpg" alt=""/>                        	                       	
+								<img src="https://s3.ca-central-1.amazonaws.com/moviebook/static/team_manan.jpg" alt=""/>
 		                 	</div>
 
 		                  <div class="member-name">
@@ -543,8 +556,8 @@
 
 		              	<div class="member-header">
 										
-								<div class="member-pic">
-		                 		<img src="images/team/member02-k.jpg" alt=""/>                        	
+							<div class="member-pic">
+		                 		<img src="https://s3.ca-central-1.amazonaws.com/moviebook/static/team_sona.jpg" alt=""/>
 		                	</div>
 		                
 		                	<div class="member-name">
@@ -811,7 +824,7 @@
                   <div>
                      <button class="submit full-width">Send Message</button>
                      <div id="image-loader">
-                        <img src="images/loader.gif" alt="" />
+                        <img src="https://s3.ca-central-1.amazonaws.com/moviebook/static/loader.gif" alt="" />
                      </div>
                   </div>
 
@@ -895,14 +908,23 @@
 
    <!-- Java Script
    ================================================== -->
-   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-   <script>window.jQuery || document.write('<script src="js/jquery-1.10.2.min.js"><\/script>')</script>
-   <script type="text/javascript" src="js/jquery-migrate-1.2.1.min.js"></script>   
-   <script src="js/jquery.flexslider.js"></script>
-   <script src="js/jquery.fittext.js"></script>
-   <script src="js/backstretch.js"></script> 
-   <script src="js/waypoints.js"></script>  
-   <script src="js/main.js"></script>
+   <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>-->
+   <!--<script>window.jQuery || document.write('<script src="js/jquery-1.10.2.min.js"><\/script>')</script>-->
+   <!--<script type="text/javascript" src="js/jquery-migrate-1.2.1.min.js"></script>   -->
+   <!--<script src="js/jquery.flexslider.js"></script>-->
+   <!--<script src="js/jquery.fittext.js"></script>-->
+   <!--<script src="js/backstretch.js"></script> -->
+   <!--<script src="js/waypoints.js"></script>  -->
+   <!--<script src="js/main.js"></script>-->
+
+    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>-->
+    <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
+    <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery.flexslider.js' %}"></script>
+    <script src="{% static 'js/jquery.fittext.js' %}"></script>
+    <script src="{% static 'js/backstretch.js' %}"></script>
+    <script src="{% static 'js/waypoints.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 
 </body>
 

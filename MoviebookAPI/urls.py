@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'', include('userprofiles.urls')),
     url(r'posts/', include('posts.urls')),
     url(r'movies/', include('movies.urls')),
+    url(r'', include('frontend.urls')),
 ]
 
 if settings.DEBUG:

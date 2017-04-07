@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'userprofiles',
     'posts',
     'movies',
+    'frontend'
 ]
 
 # Comment whitenoise.middleware.WhiteNoiseMiddleware
@@ -169,13 +170,6 @@ ACTIVATION_KEY_LENGTH = 100
 # SECURE_SSL_REDIRECT = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
-# Setting up for static files
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'frontend/static')
-
-
 # Setting up AWS S3 cloud storage
 
 # HTTP headers in turn will tell browsers that they can cache these files for a very long time.
@@ -205,6 +199,7 @@ USE_TZ = False  # Fix this before production
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'frontend/static')
 
 # Heroku server configurations
 DATABASES['default'] = dj_database_url.config()
@@ -212,7 +207,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ALLOWED_HOSTS = ['*']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # If running locally, revert to sqlite3.db
 try:
