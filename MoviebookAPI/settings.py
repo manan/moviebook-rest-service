@@ -71,7 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'MoviebookAPI.wsgi.application'
 
-# Database (for localhost, only)
+# Database (for localhost, only) # Reconfigured later for server
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 DATABASES = {
     'default': {
@@ -150,7 +150,6 @@ JWT_AUTH = {
 
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
     'JWT_AUTH_COOKIE': None,
-
 }
 
 
@@ -169,6 +168,12 @@ ACTIVATION_KEY_LENGTH = 100
 
 # SECURE_SSL_REDIRECT = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+# Setting up for static files
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'frontend/static')
 
 
 # Setting up AWS S3 cloud storage
