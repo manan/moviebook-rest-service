@@ -15,7 +15,7 @@ urlpatterns = [
     url('^signup/$', views.SignUp.as_view()),
 
     # USER ACTIVATION
-    url(r'^users/activate/$', views.ActivateUser.as_view()),
+    url(r'^users/activate/(?P<user_id>.+)/(?P<key>.+)/$', views.ActivateUser.as_view()),
 
     # GET USER DETAILS
     url(r'^users/self/$', views.SelfUser.as_view()),

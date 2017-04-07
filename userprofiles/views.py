@@ -424,10 +424,10 @@ class ActivateUser(APIView):
         permissions.AllowAny,
     ]
 
-    def post(self, request):
+    def get(self, request, user_id, key):
         try:
-            key = self.request.data['key']
-            user_id = self.request.data['user']
+            # key = self.request.data['key']
+            # user_id = self.request.data['user']
             user = User.objects.get(pk=user_id)
             if datetime.datetime.now() > user.activation_key.expires:
                 return Response(data={'detail': "Activation key has expired."}, status=401)
@@ -490,7 +490,15 @@ class SignUp(APIView):
                                 key=get_random_string(6, chars),
                                 expires=datetime.datetime.now() + datetime.timedelta(minutes=2))
         activation.save()
+        message = 'Hi ' + u.first_name + ',\n\n'
+        message += "Thank you for signing up for Moviebook. Please click on the link below to activate your account :)"
+        message += "\n\n"
         # Send email
+        send_mail(subject='Welcome!',
+                  from_email='Moviebook Inc <mehtamanan@moviebookinc.com>',
+                  message='Hello, World!',
+                  recipient_list=[u.email],
+                  fail_silently=False)
         return Response(data=RegistrationSerializer(u).data, status=200)
 
 
