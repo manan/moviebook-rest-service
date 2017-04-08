@@ -520,10 +520,10 @@ class ActivationKeyList(generics.ListAPIView):
     model = Activation
     queryset = Activation.objects.all().order_by('id')
     serializer_class = ActivationReadSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
-    # permission_classes = [
-    #     permissions.IsAdminUser,
-    # ]
+    authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = [
+        permissions.IsAdminUser,
+    ]
 
 
 # ['GET']
@@ -542,10 +542,10 @@ class UserList(generics.ListAPIView):
     model = User
     queryset = User.objects.all().order_by('id')
     serializer_class = RegistrationSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
-    # permission_classes = [
-    #     permissions.IsAdminUser,
-    # ]
+    authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = [
+        permissions.IsAdminUser,
+    ]
 
 
 # ['GET']
@@ -564,7 +564,7 @@ class ProfileList(generics.ListAPIView):
     model = UserProfile
     queryset = UserProfile.objects.all().order_by('id')
     serializer_class = UserProfileReadSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
-    # permission_classes = [
-    #     permissions.IsAdminUser,
-    # ]
+    authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = [
+        permissions.IsAdminUser,
+    ]
