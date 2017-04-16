@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'userprofiles',
     'posts',
     'movies',
-    'frontend'
 ]
 
 # Comment whitenoise.middleware.WhiteNoiseMiddleware
