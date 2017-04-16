@@ -534,11 +534,6 @@ class UserList(generics.ListAPIView):
     https://themoviebook.herokuapp.com/users/
     Gets auth.User of all users in db
     """
-    ratelimit_key = 'ip'
-    ratelimit_rate = '1/s'
-    ratelimit_block = True
-    ratelimit_method = 'GET'
-
     model = User
     queryset = User.objects.all().order_by('id')
     serializer_class = RegistrationSerializer
@@ -556,11 +551,6 @@ class ProfileList(generics.ListAPIView):
     https://themoviebook.herokuapp.com/profiles/
     Gets UserProfile of the all users in db
     """
-    ratelimit_key = 'ip'
-    ratelimit_rate = '1/s'
-    ratelimit_block = True
-    ratelimit_method = 'GET'
-
     model = UserProfile
     queryset = UserProfile.objects.all().order_by('id')
     serializer_class = UserProfileReadSerializer
