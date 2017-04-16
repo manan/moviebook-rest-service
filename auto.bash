@@ -3,6 +3,5 @@
 python manage.py makemigrations userprofiles
 python manage.py makemigrations posts
 python manage.py makemigrations movies
-python manage.py makemigrations frontend
 python manage.py migrate
 python manage.py migrate --run-syncdb
