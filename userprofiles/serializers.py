@@ -13,10 +13,11 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='user.username')
     first_name = serializers.ReadOnlyField(source='user.first_name')
     last_name = serializers.ReadOnlyField(source='user.last_name')
+    email = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = UserProfile
-        fields = ('user', 'username', 'first_name', 'last_name', 'gender', 'bio', 'birth_date',
+        fields = ('user', 'username', 'first_name', 'last_name', 'email', 'gender', 'bio', 'birth_date',
                   'profile_picture', 'followings', 'followers', 'id')
 
 
@@ -34,13 +35,13 @@ class UserProfileSelfReadSerializer(serializers.ModelSerializer):
 class UserProfileCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('user', 'gender', 'bio', 'birth_date')
+        fields = ('id', 'user', 'gender', 'bio', 'birth_date')
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('user', 'gender', 'bio', 'birth_date', 'profile_picture', 'followings', 'blocked')
+        fields = ('id', 'user', 'gender', 'bio', 'birth_date', 'profile_picture', 'followings', 'blocked')
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
