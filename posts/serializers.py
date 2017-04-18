@@ -4,7 +4,7 @@ from .models import Post
 
 class PostSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='owner.user.username')
-    profile_picture = serializers.ReadOnlyField(source='owner.user.profile.profile_picture')
+    profile_picture = serializers.ReadOnlyField(source='owner.user.profile.profile_picture.url')
 
     class Meta:
         model = Post
