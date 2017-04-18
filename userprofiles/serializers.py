@@ -3,6 +3,7 @@ from .models import UserProfile, Activation
 from django.contrib.auth.models import User
 from posts.serializers import PostSerializer
 
+
 class ActivationReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Activation
@@ -27,6 +28,8 @@ class UserProfileSelfReadSerializer(serializers.ModelSerializer):
     last_name = serializers.ReadOnlyField(source='user.last_name')
     email = serializers.ReadOnlyField(source='user.email')
     posts = PostSerializer(many=True)
+    followings = UserProfileReadSerializer(many=True)
+    followers = UserProfileReadSerializer(many=True)
 
     class Meta:
         model = UserProfile
