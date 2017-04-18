@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import UserProfile, Activation
 from django.contrib.auth.models import User
-from posts.serializers import PostSerialzer
+from posts.serializers import PostSerializer
 
 class ActivationReadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,7 +26,7 @@ class UserProfileSelfReadSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField(source='user.first_name')
     last_name = serializers.ReadOnlyField(source='user.last_name')
     email = serializers.ReadOnlyField(source='user.email')
-    posts = PostSerialzer(many=True)
+    posts = PostSerializer(many=True)
 
     class Meta:
         model = UserProfile
