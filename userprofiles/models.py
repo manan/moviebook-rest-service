@@ -57,9 +57,9 @@ class UserProfile(models.Model):
 
     def is_blocked_by(self, username=False, upid=False):
         if username:
-            return self.blockedby.filter(user__username=username).exists()
+            return self.blocked_by.filter(user__username=username).exists()
         elif upid:
-            return self.blockedby.filter(pk=upid).exists()
+            return self.blocked_by.filter(pk=upid).exists()
         else:
             return False
     
