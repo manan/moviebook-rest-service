@@ -31,7 +31,7 @@ class UserProfileSelfReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('user', 'username', 'first_name', 'last_name', 'email', 'gender', 'bio', 'birth_date',
-                  'profile_picture', 'followings', 'followers', 'blocked', 'blocked_by', 'id')
+                  'profile_picture', 'posts', 'followings', 'followers', 'blocked', 'blocked_by', 'id')
 
 
 class UserProfileCreateSerializer(serializers.ModelSerializer):
