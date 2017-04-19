@@ -73,7 +73,7 @@ class NewsFeed(generics.ListAPIView):
     ]
 
     def get_queryset(self):
-        profile =  self.request.user.profile
+        profile = self.request.user.profile
         people_following = profile.followings.all()
         newsfeed = []
         for person in people_following:
