@@ -11,6 +11,7 @@ class Post(models.Model):
     movie_title = models.CharField(max_length=200)
     movie_id = models.IntegerField()
     caption = models.CharField(max_length=200, blank=True, null=True)
+    poster_url = models.TextField(default="https://s3.ca-central-1.amazonaws.com/moviebook/no-image.jpg")
     upload_date = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
