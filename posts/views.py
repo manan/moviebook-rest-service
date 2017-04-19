@@ -73,11 +73,14 @@ class NewsFeed(generics.ListAPIView):
     ]
 
     def get_queryset(self):
-        people_following = self.request.user.profile.followings.all()
+        profile =  self.request.user.profile
+        people_following = profile.followings.all()
         newsfeed = []
         for person in people_following:
             for post in person.posts.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
                 newsfeed.append(post)
+        for post in profile.posts.filter(upload_date__gte=datetime.now() - timedelta(days=2)):
+            newsfeed.append(post)
         newsfeed.sort(key=lambda x: x.upload_date, reverse=True)
         return newsfeed
 
