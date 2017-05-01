@@ -10,11 +10,21 @@ class ActivationReadSerializer(serializers.ModelSerializer):
         fields = ('user', 'key', 'expires', 'id')
 
 
+class UserProfileFriendSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = UserProfile
+        fields = ('user', 'username', 'profile_picture')
+
+
 class UserProfileReadSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='user.username')
     first_name = serializers.ReadOnlyField(source='user.first_name')
     last_name = serializers.ReadOnlyField(source='user.last_name')
     email = serializers.ReadOnlyField(source='user.email')
+    followings = UserProfileFriendSerializer(many=True)
+    followers = UserProfileFriendSerializer(many=True)
 
     class Meta:
         model = UserProfile
@@ -28,8 +38,8 @@ class UserProfileSelfReadSerializer(serializers.ModelSerializer):
     last_name = serializers.ReadOnlyField(source='user.last_name')
     email = serializers.ReadOnlyField(source='user.email')
     posts = PostSerializer(many=True)
-    followings = UserProfileReadSerializer(many=True)
-    followers = UserProfileReadSerializer(many=True)
+    followings = UserProfileFriendSerializer(many=True)
+    followers = UserProfileFriendSerializer(many=True)
 
     class Meta:
         model = UserProfile
