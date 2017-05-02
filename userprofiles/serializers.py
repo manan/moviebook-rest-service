@@ -23,13 +23,14 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField(source='user.first_name')
     last_name = serializers.ReadOnlyField(source='user.last_name')
     email = serializers.ReadOnlyField(source='user.email')
+    posts = PostSerializer(many=True)
     followings = UserProfileFriendSerializer(many=True)
     followers = UserProfileFriendSerializer(many=True)
 
     class Meta:
         model = UserProfile
         fields = ('user', 'username', 'first_name', 'last_name', 'email', 'gender', 'bio', 'birth_date',
-                  'profile_picture', 'followings', 'followers', 'id')
+                  'profile_picture', 'posts', 'followings', 'followers', 'id')
 
 
 class UserProfileSelfReadSerializer(serializers.ModelSerializer):
